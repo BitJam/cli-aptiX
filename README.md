@@ -1,23 +1,23 @@
 # cli-aptiX
 
-## SYNOPSIS
+## Synopsis
 
 This is a command line wrapper aound the basic "apt-get", "apt-cache", and
 related commands.  It's designed to make it easy to search for and install
-Debian packages.	In some ways it is similar to the GUI based Synaptic
+Debian packages. In some ways it is similar to the GUI based Synaptic
 program.  If you been wanting something like Synaptic that works in the command
 line then maybe "cli-aptiX" is what you've been looking for.
 
-## SEARCH FOR PACKAGES
+## Search for Packages
 
 After the initial "apt-get update" you will normally perform a search to look
 for packages by name.  For any search term you enter, there will be four
 different sets of results:
 
 #### Exact Name Match
-	   
+
 If any packages have names that exactly match your search term, they are listed
-here.  There can be more than one package in this list if you used the 
+here.  There can be more than one package in this list if you used the
 " * " or "?" wildcard characters.
 
 #### Leading Name Match
@@ -55,7 +55,7 @@ name for every package in this list contains "abc".
 This list contains all of the packages from the previous list plus any packages
 that contain your search term in their description.
 
-### SELECTING A PACKAGE FROM A SEARCH RESULT LIST
+### Selecting a Package from a Search Result List
 
 As long as the entire list fits on the screen, this is straightfoward, just
 type in the number associated with the package you want to install.  But if the
@@ -63,5 +63,5 @@ list is too long to all fit on the screen at once then you will need to scroll
 through the list using "Up-Arrow" and "Down-Arrow" and <Page-Up> and
 "Page-Down" to scroll the list (and even "Left-Arrow" and "Right-Arrow" to
 scroll sideways).  Scroll the list so the package you want to select is near
-the botton of the screen and then press 'q'.	 You will be asked to enter the
+the botton of the screen and then press 'q'. You will be asked to enter the
 number for the package you want.
