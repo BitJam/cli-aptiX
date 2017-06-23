@@ -493,32 +493,44 @@ do_search() {
             while true; do
 
                 questn "Press %s to skip picking a package" "<$enter>"
-                questn "Or enter the number of the package you want to mark or install"
+                questn "Or enter the number(s) of the package(s) you want to mark or install"
                 questn "%s go to main menu, %s new search, %s see the results again" \
                     "$(bqq q)<$enter>" "$(bqq s)<$enter>" "$(bqq r)<$enter>"
                 quest "> "
 
-                local number=
-                read number
+                local input=
+                read input
 
-                case $number in
-                       "") break ;;
+                case $input in
+                       "") break    ;;
                     [qQ]*) return   ;;
                     [rR]*) action=continue ; break ;;
-                    [sS]*) action=break ; break ;;
-                    [1-9]|[1-9][0-9]|[1-9][0-9][0-9]) ;;
-                                [1-9][0-9][0-9][0-9]) ;;
-                           [1-9][0-9][0-9][0-9][0-9]) ;;
-                      [1-9][0-9][0-9][0-9][0-9][0-9]) ;;
-                    *) warn "Invalid input.  Please try again" ; continue ;;
+                    [sS]*) action=break    ; break ;;
                 esac
 
-                if [ "$number" -gt $cnt ]; then
-                    warn "That number was out of range, please try again"
+                # Test for chars other than space, digits and comma
+                if [ -z "${input##*[^0-9 ,]*}" ]; then
+                    warn "Invalid input.  Please try again"
                     continue
                 fi
 
-                break
+                local num= bad= good= good_cnt=0
+                for num in ${input//,/ }; do
+                    if [ $num -lt 0 -o $num -gt $cnt ]; then
+                        bad=$bad${bad:+ }$num
+                    else
+                        good=$good${good:+ }$num
+                        good_cnt=$((good_cnt + 1))
+                    fi
+                done
+
+                if [ -n "$bad" ]; then
+                    warn "The following number(s) were out of range: %s" "$bad"
+                fi
+
+                [ -n "$good" ] && break
+
+                warn "No valid number were given.  Please try again"
             done
 
             case $action in
@@ -526,22 +538,25 @@ do_search() {
                    break) break    ;;
             esac
 
-            local full_package=
-            if [ "$number" ]; then
-                full_package=$(nl $SEARCH_FILE | sed -n -r "s/^\s*$number\s+//p")
+            local full_package=  pack_list=
+            for num in $good; do
+                full_package=$(nl $SEARCH_FILE | sed -n -r "s/^\s*$num\s+//p")
                 if [ -z "$full_package" ]; then
-                    warn "Could not find package number %s" "$number"
-                    break
+                    warn "Could not find package number %s" "$num"
+                    continue
                 fi
                 msg "Selected package %s" "$(nq $number)"
                 show_package "$full_package"
-            fi
+                pack_list=$pack_list${pack_list:+ }$(package_name "$full_package")
+            done
 
+            #multi_mark_or_install_menu $pack_list
             # LOOP: package info
+
             while true; do
                 action=
                 local menu=$(
-                    mark_or_install_menu "$full_package"
+                    multi_mark_or_install_menu $pack_list
                     mark_all_menu        $SEARCH_FILE
                     menu_printf repeat   $"Repeat the same search"
                     menu_printf search   $"Search again"
@@ -551,16 +566,18 @@ do_search() {
                 my_select 'ans' "Please select an action" "$menu"
 
                 case $ans in
-                      info)      package_info "$full_package" ; continue ;;
-                      mark)      mark_package "$full_package"          ;;
-                    unmark)    unmark_package "$full_package"          ;;
-                   install)   install_package "$full_package" ; return ;;
-                 uninstall) uninstall_package "$full_package" ; return ;;
-                  mark-all)     mark_all_file $SEARCH_FILE             ;;
-                unmark-all)   unmark_all_file $SEARCH_FILE             ;;
-                    repeat) action=continue                            ;;
-                    search) action=break                               ;;
-                      quit) return                                     ;;
+                      info)      package_info "$full_package" ; continue   ;;
+                      mark)      mark_package "$full_package"              ;;
+                    *-mark)         mark_list "${ans%-mark}"               ;;
+                 *-install)      install_list "${ans%-install}"            ;;
+                    unmark)    unmark_package "$full_package"              ;;
+                   install)   install_package "$full_package" ; return     ;;
+                 uninstall) uninstall_package "$full_package" ; return     ;;
+                  mark-all)     mark_all_file $SEARCH_FILE                 ;;
+                unmark-all)   unmark_all_file $SEARCH_FILE                 ;;
+                    repeat) action=continue                                ;;
+                    search) action=break                                   ;;
+                      quit) return                                         ;;
                          *) internal_error "2nd search result menu" "$ans" ;;
                 esac
                 break
@@ -811,7 +828,7 @@ add_to_result_menu() {
             local package=$(package_name "$match")
             echo "$match" > $FOUND_MATCH_FILE
 
-            mark_or_install_menu "$match" "$prefix-"
+            mark_or_install_menu "$prefix-" "$match"
 
             ;;
 
@@ -838,7 +855,7 @@ add_to_star_menu() {
 # isntalling/uninstalling it.
 #------------------------------------------------------------------------------
 mark_or_install_menu() {
-    local match=$1  prefix=$2
+    local prefix=$1  match=$2
     [ -z "$match" ] && return
 
     local package=$(package_name "$match")
@@ -858,6 +875,38 @@ mark_or_install_menu() {
     fi
 
     menu_printf "${prefix}install"   "Install package %s"   "$pq_pack"
+}
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+multi_mark_or_install_menu() {
+
+    if [ $# -eq 1 ]; then
+        mark_or_install_menu "" "$1"
+        return
+    fi
+
+    local list="$*"  db=$DB_FILE
+    local regex=${list// /|}
+
+    local mark_cnt=$(egrep --count "^($regex) " $db)
+    local to_mark=$(echo $(egrep "^($regex) " $db | sed "s/ .*//"))
+
+    case $mark_cnt in
+        0) ;;
+        1) menu_printf "$to_mark-mark" "Mark unmarked, uninstalled package %s" "$(pq $to_mark)" ;;
+        *) menu_printf "$to_mark-mark" "Mark %s unmarked, uninstalled packages" "$(nq $mark_cnt)" ;;
+    esac
+
+    local install_cnt=$(egrep --count "^(M )?($regex) " $db)
+    local to_install=$(echo $(egrep "^(M )?($regex) " $db | sed -e "s/^M //" -e "s/ .*//"))
+
+     case $install_cnt in
+        0) ;;
+        1) menu_printf "$to_install-install" "install uninstalled package %s" "$(pq $to_install)" ;;
+        *) menu_printf "$to_install-install" "install %s uninstalled packages" "$(nq $install_cnt)" ;;
+    esac
 }
 
 #------------------------------------------------------------------------------
@@ -1351,7 +1400,15 @@ install_marked() {
         warn "Nothing to install"
         return
     fi
+    install_list "$(echo $packs)"
+}
 
+#------------------------------------------------------------------------------
+# Install all packages from a list
+#------------------------------------------------------------------------------
+install_list() {
+    local packs=$1  db=$DB_FILE
+    msg "Install package(s)"
     local fold_width=$(($(screen_width) - 5))
     echo $packs | fold -s -w $fold_width
 
@@ -1367,10 +1424,8 @@ install_marked() {
         unmet_deps=$(egrep "^(M )?($regex) " $db | sed -r -e "s/^MI? //" -e "s/ .*//")
         local real_cnt=$(echo "$unmet_deps" | wc -l)
         msg "found %s unmet dependencies that will also get installed" "$(nq $real_cnt)"
+        log_it_q echo $unmet_deps | fold -w $fold_width -s
     fi
-
-    local fold_width=$(($(screen_width) - 5))
-    log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $packs $unmet_deps)
     msg "The package(s) and dependencies will take %s Meg" "$(nq $size)"
@@ -1668,7 +1723,7 @@ do_suggested() {
         while true; do
 
             local menu=$(
-                mark_or_install_menu "$full_package"
+                mark_or_install_menu "" "$full_package"
                 mark_all_menu        $SEARCH_FILE
                 install_all_menu     $SEARCH_FILE
                 menu_printf suggest  $"See suggestions again"
@@ -1734,6 +1789,14 @@ mark_all_file_and_deps() {
 mark_all_file() {
     local file=$1  db=$DB_FILE  files="$DB_FILE $SUGGESTED_FILE"
     local packs=$(egrep "^[a-z0-9]" $file | sed -e "s/I //" -e "s/ .*//")
+    mark_list "$packs"
+}
+
+#------------------------------------------------------------------------------
+# Mark list, mark all packages in a list
+#------------------------------------------------------------------------------
+mark_list() {
+    local packs=$1  db=$DB_FILE  files="$DB_FILE $SUGGESTED_FILE"
     local regex=$(echo $packs | tr ' ' '|')
     #echo $regex
     #sed -r -i -e "s/^I ($regex) /MI \1 /" -e "s/^($regex) /M \1 /" $files
