@@ -895,8 +895,8 @@ multi_mark_or_install_menu() {
 
     case $mark_cnt in
         0) ;;
-        1) menu_printf "$to_mark-mark" "Mark unmarked, uninstalled package %s" "$(pq $to_mark)" ;;
-        *) menu_printf "$to_mark-mark" "Mark %s unmarked, uninstalled packages" "$(nq $mark_cnt)" ;;
+        1) menu_printf "$to_mark-mark" "Mark selected, uninstalled package %s" "$(pq $to_mark)" ;;
+        *) menu_printf "$to_mark-mark" "Mark %s selected, uninstalled packages" "$(nq $mark_cnt)" ;;
     esac
 
     local install_cnt=$(egrep --count "^(M )?($regex) " $db)
@@ -904,8 +904,8 @@ multi_mark_or_install_menu() {
 
      case $install_cnt in
         0) ;;
-        1) menu_printf "$to_install-install" "install uninstalled package %s" "$(pq $to_install)" ;;
-        *) menu_printf "$to_install-install" "install %s uninstalled packages" "$(nq $install_cnt)" ;;
+        1) menu_printf "$to_install-install" "install selected uninstalled package %s" "$(pq $to_install)" ;;
+        *) menu_printf "$to_install-install" "install %s selected uninstalled packages" "$(nq $install_cnt)" ;;
     esac
 }
 
