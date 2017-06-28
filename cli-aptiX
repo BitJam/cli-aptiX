@@ -306,6 +306,8 @@ source_menu() {
 #------------------------------------------------------------------------------
 show_package() {
     local match=$(echo "$1" | tr -s ' ')  width=$(screen_width)  attrib
+    local num=$2
+
     local max_width=$((width - 5))
     [ -z "$match" ] && return
     if [ -z "${match##M*}" ]; then
@@ -318,7 +320,7 @@ show_package() {
     fi
     match=${match# }
 
-    arrow_msg "$hi_co%s" "${match:0:$max_width}"
+    arrow_msg_n "$num" "$hi_co%s" "${match:0:$max_width}"
     [ "$attrib" ] && echo "$attrib"
 }
 
@@ -494,6 +496,7 @@ do_search() {
 
                 questn "Press %s to skip picking a package" "<$enter>"
                 questn "Or enter the number(s) of the package(s) you want to mark or install"
+                questn "Use %s to indicate a range of numbers" "$(bqq -)"
                 questn "%s go to main menu, %s new search, %s see the results again" \
                     "$(bqq q)<$enter>" "$(bqq s)<$enter>" "$(bqq r)<$enter>"
                 quest "> "
@@ -509,13 +512,13 @@ do_search() {
                 esac
 
                 # Test for chars other than space, digits and comma
-                if [ -z "${input##*[^0-9 ,]*}" ]; then
+                if ! is_num_range "$input"; then
                     warn "Invalid input.  Please try again"
                     continue
                 fi
 
                 local num= bad= good= good_cnt=0
-                for num in ${input//,/ }; do
+                for num in $(num_range "$input" 1 $cnt); do
                     if [ $num -lt 0 -o $num -gt $cnt ]; then
                         bad=$bad${bad:+ }$num
                     else
@@ -539,14 +542,15 @@ do_search() {
             esac
 
             local full_package=  pack_list=
+
+            msg "Selected package(s)"
             for num in $good; do
                 full_package=$(nl $SEARCH_FILE | sed -n -r "s/^\s*$num\s+//p")
                 if [ -z "$full_package" ]; then
                     warn "Could not find package number %s" "$num"
                     continue
                 fi
-                msg "Selected package %s" "$(nq $number)"
-                show_package "$full_package"
+                show_package "$full_package" $num
                 pack_list=$pack_list${pack_list:+ }$(package_name "$full_package")
             done
 
@@ -2057,6 +2061,16 @@ testing() { [ -n "$TEST" ]; return $?; }
 arrow_msg() {
     local fmt=$1 ; shift
     msg "$(bq "==>") $fmt" "$@"
+}
+
+#------------------------------------------------------------------------------
+# Add a number to the arrow (to indicate the selection number)
+#------------------------------------------------------------------------------
+arrow_msg_n() {
+    local num=$1  fmt=$2 ; shift 2
+    local arrow="==>"
+    [ -n "$num" ] && arrow=$(printf "$num_co%2s$bold_co>" $num)
+    msg "$(bq "$arrow") $fmt" "$@"
 }
 
 #------------------------------------------------------------------------------
