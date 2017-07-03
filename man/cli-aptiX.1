@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "CLI-APTIX 1"
-.TH CLI-APTIX 1 "2017-06-20" "Version 2.0.0" "antiX Documentation"
+.TH CLI-APTIX 1 "2017-07-02" "Version 2.0.0" "antiX Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -213,8 +213,8 @@ the name.
 This list contains all of the packages from the previous list
 plus any packages that contain your search term in their
 description.
-.SH "SELECTING A PACKAGE FROM A SEARCH RESULT LIST"
-.IX Header "SELECTING A PACKAGE FROM A SEARCH RESULT LIST"
+.SH "SELECTING PACKAGES FROM A SEARCH RESULT LIST"
+.IX Header "SELECTING PACKAGES FROM A SEARCH RESULT LIST"
 As long as the entire list fits on the screen, this is
 straightforward, just type in the number associated with the
 package you want to install.  But if the list is too long to all
@@ -223,8 +223,20 @@ the list using \f(CW\*(C`Up\-Arrow\*(C'\fR and \f(CW\*(C`Down\-Arrow\*(C'\fR and
 \&\f(CW\*(C`Page\-Down\*(C'\fR to scroll the list (and even \f(CW\*(C`Left\-Arrow\*(C'\fR and
 \&\f(CW\*(C`Right\-Arrow\*(C'\fR to scroll sideways).  Scroll the list so the
 package you want to select is near the bottom of the screen and
-then press 'q'.  You will be asked to enter the number for the
-package you want.
+then press 'q'.  You will be asked to enter the number or numbers
+of the packages you want to mark or install.
+.PP
+You can enter multiple numbers separated by spaces or commas
+and you can also enter ranges of number using a hypen so
+.PP
+.Vb 1
+\&    3 \- 7   means 3,4,5,6,7
+.Ve
+.PP
+The first number in a range defaults to one and the last number
+defaults to the total number of packages in the list so entering
+a hyphen with nothing else will select every package from the
+list (which is not necessarily a good idea for long lists)
 .SH "INSTALLING A PACKAGE"
 .IX Header "INSTALLING A PACKAGE"
 Once you have selected a package from the search list, you will
