@@ -49,12 +49,70 @@ MARK_CNT=0
  BAR_80="#=============================================================================="
 SBAR_80="#------------------------------------------------------------------------------"
 
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+usage() {
+    local ret=${1:-0}
+
+cat<<Usage
+Usage: $ME [options]
+
+Search for, mark, and install Debian-based packages.
+
+Options:
+    -C --color=<xxx>   Set color scheme to off|low|low2|bw|dark|high
+    -h --help          Show this usage
+       --pause         Puase before exiting
+Usage
+    exit $ret
+}
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+eval_early_argument() {
+    local val=${1#*=}
+    case $1 in
+               -pause) PAUSE="$PAUSE${PAUSE:+,}exit" ;;
+              -help|h) usage                         ;;
+    esac
+}
+
+eval_argument() {
+    local arg=$1  val=$2
+    case $arg in
+        -color|C)  COLOR_SCHEME=$val                ;;
+          -pause)                                   ;;
+
+          *)  fatal "Unknown parameter %s" "-$arg"  ;;
+     esac
+}
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+takes_param() {
+    case $1 in
+       -color|C) return 0 ;;
+    esac
+    return 1
+}
+
 #------------------------------------------------------------------------------
 # The main program.  Should add command line options for color, simple/expert
 # and so on.   Could that be a submenu???
 #------------------------------------------------------------------------------
 main() {
+    local SHORT_STACK="Ch"
+
+    read_early_params "$@"
+
     testing || need_root
+
+    read_all_cmdline_mingled "$@"
+    set_colors $COLOR_SCHEME
 
     # For now (at least) add menus to the log file
     VERBOSE_SELECT=true
@@ -71,7 +129,7 @@ main() {
 
     testing && start_testing_mode
 
-    trap on_exit EXIT
+    trap my_exit EXIT
 
     testing || do_flock
     #shout $"Starting %s" "$ME"
@@ -2104,7 +2162,6 @@ umount_work_dir() {
     rmdir "$dir"
 }
 
-
 #------------------------------------------------------------------------------
 # For testing on non-Debian based systems
 #------------------------------------------------------------------------------
@@ -2149,15 +2206,18 @@ start_testing_mode() {
 }
 
 
-on_exit() {
+my_exit() {
+    local ret=${1:-0}
     testing || umount_work_dir
     testing || unflock
+    pause exit $"Exit"
+    exit $ret
 }
 
 #===== Start Here =============================================================
 
 load_lib "$SHELL_LIB" "$LIB_PATH"
 
-set_colors "$1"
+set_colors
 
 main "$@"
