@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=Live-usb kernel updater
-Comment=Update the kernel on a live-usb system
-Icon=drive-removable-media-usb
+Name=Command line apt control centre
+Comment=Search for and install Debian-based packages
+Icon=system-software-install
 Type=Application
 Terminal=true
 Exec=sudo /usr/local/bin/cli-aptiX --pause
