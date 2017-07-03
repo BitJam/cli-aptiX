@@ -24,7 +24,10 @@ MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
     LIST_DIR=/var/lib/apt/lists
   SOURCE_DIR=/etc/apt/sources.list.d
 
-  SUGGESTED_SRC=/usr/local/share/$ME/suggested.packages
+  SUGGESTED_DIR=/usr/local/share/$ME/suggested
+
+  SUGGEST_TYPES="cli gui"
+ SUGGEST_TITLES=cli:$"Command Line"\\ngui:$"GUI"
 
   THE_LOG_FILE=/var/log/$ME.log
 
@@ -40,7 +43,7 @@ AUTO_UPDATE_INTERVAL="5"  # Days
          SEARCH_FILE=$WORK_DIR/SEARCH-RESULTS
              DB_FILE=$WORK_DIR/all.list
       INSTALLED_FILE=$WORK_DIR/installed.list
-      SUGGESTED_FILE=$WORK_DIR/suggested.list
+    SUGGESTED_DB_DIR=$WORK_DIR/suggested
 
 MARK_CNT=0
 : ${EDITOR:=name}
@@ -171,7 +174,8 @@ do_main_menu() {
     msg
     shout_title "$MAIN_TITLE"
 
-    suggest_warning
+    suggest_warning cli
+    suggest_warning gui
     upgrade_warning
 
     local title=$"Main Menu"
@@ -180,13 +184,14 @@ do_main_menu() {
     run_outer my_select 'ans' "$title" "$(main_menu)"
 
     case $ans in
-              search) do_search       ;;
-              update) do_update       ;;
-             upgrade) do_upgrade_menu ;;
-                edit) do_source_menu  ;;
-           suggested) do_suggested    ;;
-         view-marked) do_view_marked  ;;
-                quit) exit            ;;
+              search) do_search        ;;
+              update) do_update        ;;
+             upgrade) do_upgrade_menu  ;;
+                edit) do_source_menu   ;;
+       suggested-cli) do_suggested cli ;;
+       suggested-gui) do_suggested gui ;;
+         view-marked) do_view_marked   ;;
+                quit) exit             ;;
 
         *)  warn "The '%s' feature isn't implemented yet" "$(pqw $ans)"
             press_enter ;;
@@ -202,7 +207,8 @@ main_menu() {
     : ${UPGRADE_CNT:=$(count_upgrades)}
 
     menu_printf search    "Search for packages to mark or install"
-    add_suggest_entry
+    add_suggest_entry     cli
+    add_suggest_entry     gui
     menu_printf kernels   "Search for kernels or antiX kernels"
     menu_printf update    "Update package index"
     menu_printf edit      "Edit the repo source files"
@@ -215,13 +221,14 @@ main_menu() {
 # Gently warn if the suggestions are all already installed
 #------------------------------------------------------------------------------
 suggest_warning() {
-    local file=$SUGGESTED_FILE
+    local type=$1 title=$(suggest_title $1)
+    local file=$SUGGESTED_DB_DIR/$type.list
     test -r $file || return
     local tot=$(egrep --count "^[MIa-z0-9]" $file)
     local cnt=$(egrep -v "^M?I" $file | egrep --count "^[MIa-z0-9]")
     [ $cnt -gt 0 ] && return
     [ $tot -eq 0 ] && return
-    msg "All %s suggested packages have been installed" "$tot"
+    msg "All %s suggested %s packages have been installed" "$tot" "$title"
 }
 
 #------------------------------------------------------------------------------
@@ -236,6 +243,26 @@ upgrade_warning() {
 # Add the suggestions entry if there are any left to install
 #------------------------------------------------------------------------------
 add_suggest_entry() {
+    local type=$1  title=$(suggest_title $1)
+    local file=$SUGGESTED_DIR/$type.list
+    test -r $file || return
+    local cnt=$(egrep "^[MIa-z0-9]" $file | egrep --count -v "^M?I")
+    [ $cnt -gt 0 ] || return
+    menu_printf suggested-$type "View a list of %s suggested %s packages" "$(nq $cnt)" "$title"
+}
+
+#------------------------------------------------------------------------------
+# Convert type to title
+#------------------------------------------------------------------------------
+suggest_title() {
+    local type=$1
+    echo -e "$SUGGEST_TITLES" | grep "^$type:" | cut -d: -f2
+}
+
+#------------------------------------------------------------------------------
+# Add the suggestions entry if there are any left to install
+#------------------------------------------------------------------------------
+old_add_suggest_entry() {
     local file=$SUGGESTED_FILE
     test -r $file || return
     local cnt=$(egrep "^[MIa-z0-9]" $file | egrep --count -v "^M?I")
@@ -337,8 +364,9 @@ show_package() {
         match=${match#I}
     fi
     match=${match# }
+    local msg=$(echo "${match:0:$max_width}" | sed -r "s/(\*+)/$bold_co\1$hi_co/")
 
-    arrow_msg_n "$num" "$hi_co%s" "${match:0:$max_width}"
+    arrow_msg_n "$num" "$hi_co%s" "$msg"
     [ "$attrib" ] && echo "$attrib"
 }
 
@@ -1150,8 +1178,18 @@ generate_database_files() {
     local db=${1:-$DB_FILE}   installed=${2:-$INSTALLED_FILE}
     list_installed > $installed
     list_all | mark-installed-debs $installed > $db
-    #cat $SUGGESTED_SRC | only_valid_packages | mark-installed-debs $installed > $SUGGESTED_FILE
-    cat $SUGGESTED_SRC | mark-installed-debs $installed > $SUGGESTED_FILE
+
+    DB_FILE_LIST=$db
+
+    mkdir -p $SUGGESTED_DB_DIR
+    local type
+    for type in $SUGGEST_TYPES; do
+        local from=$SUGGESTED_DIR/$type.list
+        local to=$SUGGESTED_DB_DIR/$type.list
+        test -r $from || continue
+        cat $from | mark-installed-debs $installed > $to
+        DB_FILE_LIST="$DB_FILE_LIST $to"
+    done
 
     msg_elapsed_t "database generation"
 }
@@ -1185,7 +1223,7 @@ really_is_installed() {
 # Mark a package installed
 #------------------------------------------------------------------------------
 mark_as_installed() {
-    local pack=$1  files=${2:-$DB_FILE $SUGGESTED_FILE}
+    local pack=$1  files=$DB_FILE_LIST
     sed -i -r -e "s/^($pack )/I \1/"  -e "s/^M ($pack )/MI \1/" $files
 }
 
@@ -1193,7 +1231,7 @@ mark_as_installed() {
 # Mark a package uninstalled
 #------------------------------------------------------------------------------
 mark_as_uninstalled() {
-    local pack=$1  files=${2:-$DB_FILE $SUGGESTED_FILE}
+    local pack=$1  files=$DB_FILE_LIST
     sed -i -r -e "s/^I ($pack )/\1/" -e "s/^MI ($pack )/M \1/" $files
 }
 
@@ -1201,7 +1239,7 @@ mark_as_uninstalled() {
 # Mark a package unmarked and installed, for use in install_marked()
 #------------------------------------------------------------------------------
 unmark_and_mark_installed() {
-    local pack ilist files="$DB_FILE $SUGGESTED_FILE"
+    local pack ilist files=$DB_FILE_LIST
 
     start_timer
     msg "Updating database ..."
@@ -1219,10 +1257,10 @@ unmark_and_mark_installed() {
 }
 
 #------------------------------------------------------------------------------
-# Mark a package and all uninstalled dependencies
+# Mark a package and all uninstalled dependencies   NOT USED
 #------------------------------------------------------------------------------
 mark_package_and_deps() {
-    local pack=$(package_name "$1")  db=$DB_FILE sug=$SUGGESTED_FILE
+    local pack=$(package_name "$1")  db=$DB_FILE files=$DB_FILE_LIST
     _mark_package "$pack"
 
     #testing && return
@@ -1235,7 +1273,7 @@ mark_package_and_deps() {
     local cnt=$(egrep --count "^($regex) " $db)
     arrow_msg "Marking %s uninstalled dependencies" "$(nq $cnt)"
     echo $(egrep "^($regex) " $db | sed "s/ .*//")
-    sed -i -r "s/^($regex) /M \1 /" $db $sug
+    sed -i -r "s/^($regex) /M \1 /" $files
     MARK_CNT=$((MARK_CNT + cnt))
 }
 
@@ -1243,7 +1281,7 @@ mark_package_and_deps() {
 # Mark a package and report dependencies
 #------------------------------------------------------------------------------
 mark_package() {
-    local pack=$(package_name "$1")  db=$DB_FILE sug=$SUGGESTED_FILE
+    local pack=$(package_name "$1")  db=$DB_FILE files=$DB_FILE_LIST
     _mark_package "$pack"
 
     #testing && return
@@ -1295,10 +1333,10 @@ unmark_package() {
 # Unmark all packages
 #------------------------------------------------------------------------------
 unmark_all() {
-    local db=$DB_FILE  sug=$SUGGESTED_FILE
+    local db=$DB_FILE  files=$DB_FILE_LIST
     local cnt=$(grep --count "^M" $db)
 
-    sed -i -r "s/^M ?//" $db $sug
+    sed -i -r "s/^M ?//" $files
     arrow_msg "Unmarked %s package(s)" "$(nq $cnt)"
 
     MARK_CNT=0
@@ -1398,7 +1436,7 @@ install_package() {
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $pack $unmet_deps)
-    msg "This package and dependencies will take %s Meg" "$(nq $size)"
+    msg "This package and unmet dependencies will take %s Meg" "$(nq $size)"
     YES_no "Do you want to install this package now?" || return
 
     msg "Installing %s" "$(pq $pack)"
@@ -1579,13 +1617,14 @@ do_view_marked() {
 #
 #------------------------------------------------------------------------------
 do_suggested() {
-    local db=${1:-$DB_FILE}  local
+    local type=$1  title=$(suggest_title $1)  db=$DB_FILE
+    local SUGGESTED_FILE=$SUGGESTED_DB_DIR/$type.list
 
     local mark_cnt=0
     local ans
     while true; do
 
-        shout_subtitle "Suggested Packages"
+        shout_subtitle "Suggested %s Packages" "$title"
 
         local   all_str="^[MIa-z0-9]"
         local  five_str="^[MIa-z0-9].*\*{5}"
@@ -1798,7 +1837,7 @@ do_suggested() {
 # Mark all unmarked, uninstalled packages that are listed in a file
 #------------------------------------------------------------------------------
 mark_all_file_and_deps() {
-    local file=$1  db=$DB_FILE  files="$DB_FILE $SUGGESTED_FILE"
+    local file=$1  db=$DB_FILE  files=$DB_FILE_LIST
     local packs=$(egrep "^[a-z0-9]" $file | sed -e "s/I //" -e "s/ .*//")
     local regex=$(echo $packs | tr ' ' '|')
     #echo $regex
@@ -1824,7 +1863,7 @@ mark_all_file_and_deps() {
 # Mark all uninstalled packages listed in a file.  Report on deps
 #------------------------------------------------------------------------------
 mark_all_file() {
-    local file=$1  db=$DB_FILE  files="$DB_FILE $SUGGESTED_FILE"
+    local file=$1  db=$DB_FILE  files=$DB_FILE_LIST
     local packs=$(egrep "^[a-z0-9]" $file | sed -e "s/I //" -e "s/ .*//")
     mark_list "$packs"
 }
@@ -1833,7 +1872,7 @@ mark_all_file() {
 # Mark list, mark all packages in a list
 #------------------------------------------------------------------------------
 mark_list() {
-    local packs=$1  db=$DB_FILE  files="$DB_FILE $SUGGESTED_FILE"
+    local packs=$1  db=$DB_FILE  files=$DB_FILE_LIST
     local regex=$(echo $packs | tr ' ' '|')
     #echo $regex
     #sed -r -i -e "s/^I ($regex) /MI \1 /" -e "s/^($regex) /M \1 /" $files
@@ -1853,15 +1892,15 @@ mark_list() {
     local fold_width=$(($(screen_width) - 5))
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
-    local size=$(package_size $pack $unmet_deps)
-    msg "This package and unmet dependencies will take %s Meg" "$(nq $size)"
+    local size=$(package_size $packs $unmet_deps)
+    msg "The package(s) and unmet dependencies will take %s Meg" "$(nq $size)"
 }
 
 #------------------------------------------------------------------------------
 # Unmark all packages listed inside of a file
 #------------------------------------------------------------------------------
 unmark_all_file() {
-    local file=$1  files=${2:-$DB_FILE $SUGGESTED_FILE}
+    local file=$1  files=$DB_FILE_LIST
     local packs=$(egrep "^MI? [a-z0-9]" $file | sed -r -e "s/MI? //" -e "s/ .*//")
     local regex=$(echo $packs | tr ' ' '|')
     #echo $regex
@@ -2175,7 +2214,7 @@ start_testing_mode() {
     LOG_FILE=$ME.log
     #PRETEND_MODE=true
 
-  SUGGESTED_SRC=share/suggested.packages
+  SUGGESTED_DIR=share/suggested
 
     ARCH="i386"
 
