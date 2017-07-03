@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Live-usb kernel updater
+Comment=Update the kernel on a live-usb system
+Icon=drive-removable-media-usb
+Type=Application
+Terminal=true
+Exec=sudo /usr/local/bin/cli-aptiX --pause
+Categories=PackageManager;GTK;System;Settings;ConsoleOnly;
