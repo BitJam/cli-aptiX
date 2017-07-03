@@ -29,10 +29,8 @@ MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
   SUGGEST_TYPES="cli gui"
  SUGGEST_TITLES=cli:$"Command Line"\\ngui:$"GUI"
 
-  THE_LOG_FILE=/var/log/$ME.log
+   THE_LOG_FILE=/var/log/$ME.log
 
-  # For now so it stays on the usb stick
-  THE_LOG_FILE=./$ME.log
 
 AUTO_UPDATE_INTERVAL="5"  # Days
 
