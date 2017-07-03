@@ -1,0 +1,63 @@
+#-------------------------------------------------------------------------------
+# Games
+#-------------------------------------------------------------------------------
+frozen-bubble         cool game where you pop out the bubbles!
+gamine                Interactive game for young children
+gcompris              Educational games for small children
+gnome-games           games for the GNOME desktop
+steam                 Valve's Steam digital software delivery system
+supertux              Classic 2D jump 'n run sidescroller with Tux
+supertuxkart          3D kart racing game
+
+#-------------------------------------------------------------------------------
+# Desktop
+#-------------------------------------------------------------------------------
+docky                 Elegant, powerful, clean dock
+fvwm                  F(?) Virtual Window Manager
+mate-core             MATE Desktop Environment (essential components, dummy package)
+
+#-------------------------------------------------------------------------------
+# Audio/Video
+#-------------------------------------------------------------------------------
+audacious             small and fast audio player which supports lots of formats
+audacity              fast, cross-platform audio editor
+handbrake             versatile DVD ripper and video transcoder (GTK+ GUI)
+openshot              Create and edit videos and movies
+pulseaudio            PulseAudio sound server
+smplayer              Complete front-end for MPlayer and mpv
+smtube                YouTube videos browser
+
+#-------------------------------------------------------------------------------
+# Graphics
+#-------------------------------------------------------------------------------
+blender               Very fast and versatile 3D modeller/renderer
+calibre               e-book converter and library management
+gimp                  GNU Image Manipulation Program
+imagemagick           image manipulation programs -- binaries
+inkscape              vector-based drawing program
+gscan2pdf             GUI to produce PDFs or DjVus from scanned documents
+shotwell              digital photo organizer
+
+#-------------------------------------------------------------------------------
+# Internet
+#-------------------------------------------------------------------------------
+chromium              web browser
+filezilla             Full-featured graphical FTP/FTPS/SFTP client
+netsurf               small web browser with CSS support - transitional package
+palemoon              Firefox-based, efficient and easy to use web browser
+qbittorrent           bittorrent client based on libtorrent-rasterbar with a Qt5 GUI
+qupzilla              lightweight web browser based on libqtwebkit
+seamonkey             The Seamonkey Internet Suite
+thunderbird           mail/news client with RSS, chat and integrated spam filter support
+
+#-------------------------------------------------------------------------------
+# Other
+#-------------------------------------------------------------------------------
+blueman               Graphical bluetooth manager
+gnucash               personal and small-business financial-accounting software
+meld                  graphical tool to diff and merge files
+opendict              computer dictionary for several dictionary formats
+openjdk-8-jre         OpenJDK Java runtime, using Hotspot JIT
+qtcreator             integrated development environment (IDE) for Qt
+texlive               TeX Live: A decent selection of the TeX Live packages
+wine                  Windows API implementation - standard suite
