@@ -49,46 +49,6 @@ MARK_CNT=0
  BAR_80="#=============================================================================="
 SBAR_80="#------------------------------------------------------------------------------"
 
-start_testing_mode() {
-
-    TEST_DIR=Private/apt
-    SOURCE_DIR=$TEST_DIR/sources.d
-    LIST_DIR=$TEST_DIR/lists
-
-    THE_LOG_FILE=$ME.log
-    LOG_FILE=$ME.log
-    #PRETEND_MODE=true
-
-  SUGGESTED_SRC=share/suggested.packages
-
-    ARCH="i386"
-
-    #- perform_search() {
-    #-     local str=$1
-
-    #-     grep -Eh "$str" $TEST_DIR/full.list
-    #- }
-
-    list_installed() {
-        cat $TEST_DIR/installed.list
-    }
-
-    list_all() {
-        cat $TEST_DIR/full.list
-    }
-
-    list_depends() {
-        local regex=$(echo "$*" | tr ' ' '|')
-        egrep "^($regex):" $TEST_DIR/all.depend | cut -d" " --complement -f1 | tr ' ' '\n' | sort -u
-    }
-
-    package_exists() {
-        local pack=$1
-        [ -n "${pack##p*}" ]
-        return $?
-    }
-}
-
 #------------------------------------------------------------------------------
 # The main program.  Should add command line options for color, simple/expert
 # and so on.   Could that be a submenu???
@@ -2143,6 +2103,51 @@ umount_work_dir() {
     done
     rmdir "$dir"
 }
+
+
+#------------------------------------------------------------------------------
+# For testing on non-Debian based systems
+#------------------------------------------------------------------------------
+start_testing_mode() {
+
+    TEST_DIR=Private/apt
+    SOURCE_DIR=$TEST_DIR/sources.d
+    LIST_DIR=$TEST_DIR/lists
+
+    THE_LOG_FILE=$ME.log
+    LOG_FILE=$ME.log
+    #PRETEND_MODE=true
+
+  SUGGESTED_SRC=share/suggested.packages
+
+    ARCH="i386"
+
+    #- perform_search() {
+    #-     local str=$1
+
+    #-     grep -Eh "$str" $TEST_DIR/full.list
+    #- }
+
+    list_installed() {
+        cat $TEST_DIR/installed.list
+    }
+
+    list_all() {
+        cat $TEST_DIR/full.list
+    }
+
+    list_depends() {
+        local regex=$(echo "$*" | tr ' ' '|')
+        egrep "^($regex):" $TEST_DIR/all.depend | cut -d" " --complement -f1 | tr ' ' '\n' | sort -u
+    }
+
+    package_exists() {
+        local pack=$1
+        [ -n "${pack##p*}" ]
+        return $?
+    }
+}
+
 
 on_exit() {
     testing || umount_work_dir
