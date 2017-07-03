@@ -1,5 +1,5 @@
 [Desktop Entry]
-Name=Command line apt control centre
+Name=Command line apt-based package manager
 Comment=Search for and install Debian-based packages
 Icon=system-software-install
 Type=Application
