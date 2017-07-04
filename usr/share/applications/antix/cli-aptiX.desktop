@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Command line apt-based package manager
+Comment=Search for and install Debian-based packages
+Icon=system-software-install
+Type=Application
+Terminal=true
+Exec=sudo /usr/local/bin/cli-aptiX --pause
+Categories=PackageManager;GTK;System;Settings;ConsoleOnly;

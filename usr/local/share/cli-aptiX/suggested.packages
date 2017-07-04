@@ -30,7 +30,6 @@ sudoku                console based sudoku
 #-------------------------------------------------------------------------------
 elinks           **** advanced text-mode WWW browser
 links2           **** Web browser running in both graphics and text mode
-w3m               *** Pager/text-based web browser. It has vim-like keybindings, and is able to display images	
 
 #-------------------------------------------------------------------------------
 # Audio
@@ -38,11 +37,8 @@ w3m               *** Pager/text-based web browser. It has vim-like keybindings,
 adplay                console-based OPL2 audio player
 cdcd                  command line or console based CD player
 cdtool                text-based audio CD player and CD-ROM control commands
-cmus                  feature-rich ncurses-based music player
-cplay                 Curses front-end for various audio players (ogg123, mpg123, mpg321, splay, madplay, and mikmod, xmp, and sox)
 moc             ***** ncurses based console audio player
 mp3blaster            Full-screen console mp3 and Ogg Vorbis player
-mpd                   Lightweight and scalable choice for music management.
 pianobar              console based player for Pandora radio
 zomg                  console-based libre.fm submission and radio client
 
@@ -54,8 +50,6 @@ fdclone               console-base lightweight file manager
 lfm               *** simple but powerful file manager for the UNIX console
 mc              ***** Midnight Commander - a powerful file manager
 dvtm                  Tiling window management for the console
-ranger                Console-based file manager with vi bindings, customizability, and lots of features
-vifm                  Ncurses-based two-panel file manager with vi-like keybindings
 
 #-------------------------------------------------------------------------------
 # Network Monitors
@@ -111,19 +105,12 @@ vlock                 Virtual Console locking program
 #-------------------------------------------------------------------------------
 # Chatting and Bittorrent
 #-------------------------------------------------------------------------------
-bitchx                console-based IRC client developed from the popular ircII
 bittornado            bittorrent client (and tracker) with console and curses interfaces
 deluge-console        bittorrent client written in Python/PyGTK (console ui)
 irssi           ***** terminal based IRC client
 mcabber               small Jabber (XMPP) console client
 ttytter               console Twitter client
 weechat-curses        Fast, light and extensible chat client - console client
-
-#-------------------------------------------------------------------------------
-# News, RSS, and blogs
-#-------------------------------------------------------------------------------
-cantoNcurses          RSS aggregator.
-newsbeuter            Ncurses RSS aggregator with layout and keybinding similar to the Mutt email client.
 
 #-------------------------------------------------------------------------------
 # Other
