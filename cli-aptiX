@@ -17,6 +17,8 @@ MAIN_TITLE="antiX CLI Package Installer"
 MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
    LIB_DIR="/usr/local/lib/cli-shell-utils"
 
+export TEXTDOMAIN="cli-aptiX"
+
   LIB_PATH="$MY_LIB_DIR:$LIB_DIR"
       PATH="$MY_LIB_DIR/bin:$LIB_DIR/bin:$PATH"
  SHELL_LIB="cli-shell-utils.bash"
@@ -66,7 +68,7 @@ Usage
 }
 
 #------------------------------------------------------------------------------
-#
+# Callback routine for reading command line params
 #------------------------------------------------------------------------------
 eval_early_argument() {
     local val=${1#*=}
@@ -76,6 +78,9 @@ eval_early_argument() {
     esac
 }
 
+#------------------------------------------------------------------------------
+# Callback routine for reading command line params
+#------------------------------------------------------------------------------
 eval_argument() {
     local arg=$1  val=$2
     case $arg in
@@ -87,7 +92,7 @@ eval_argument() {
 }
 
 #------------------------------------------------------------------------------
-#
+# Callback routine for reading command line params
 #------------------------------------------------------------------------------
 takes_param() {
     case $1 in
@@ -114,13 +119,13 @@ main() {
     VERBOSE_SELECT=true
 
     # Used in my_select() to return instead of exit on 'q'
-    BACK_TO_MAIN="go back to main menu"
+    BACK_TO_MAIN=$"Go back to main menu"
 
     local UPGRADE_CNT
 
     case $(uname -m) in
-          i686) ARCH="i386"  ;;
-        x86_64) ARCH="amd64" ;;
+          i686) ARCH='i386'  ;;
+        x86_64) ARCH='amd64' ;;
     esac
 
     testing && start_testing_mode
@@ -199,15 +204,15 @@ main_menu() {
     local upgrade_lab
     : ${UPGRADE_CNT:=$(count_upgrades)}
 
-    menu_printf search    "Search for packages to mark or install"
+    menu_printf search    $"Search for packages to mark or install"
     add_suggest_entry     cli
     add_suggest_entry     gui
-    menu_printf kernels   "Search for kernels or antiX kernels"
-    menu_printf update    "Update package index"
-    menu_printf edit      "Edit the repo source files"
+    #menu_printf kernels   $"Search for kernels or antiX kernels"
+    menu_printf update    $"Update package index"
+    menu_printf edit      $"Edit the repo source files"
     add_upgrade_entry
     add_mark_entry
-    menu_printf quit      "Quit"
+    menu_printf quit      $"Quit"
 }
 
 #------------------------------------------------------------------------------
@@ -221,7 +226,7 @@ suggest_warning() {
     local cnt=$(egrep -v "^M?I" $file | egrep --count "^[MIa-z0-9]")
     [ $cnt -gt 0 ] && return
     [ $tot -eq 0 ] && return
-    msg "All %s suggested %s packages have been installed" "$tot" "$title"
+    msg $"All %s suggested %s packages have been installed" "$tot" "$title"
 }
 
 #------------------------------------------------------------------------------
@@ -241,7 +246,7 @@ add_suggest_entry() {
     test -r $file || return
     local cnt=$(egrep "^[MIa-z0-9]" $file | egrep --count -v "^M?I")
     [ $cnt -gt 0 ] || return
-    menu_printf suggested-$type "View a list of %s suggested %s packages" "$(nq $cnt)" "$title"
+    menu_printf suggested-$type $"View a list of %s suggested %s packages" "$(nq $cnt)" "$title"
 }
 
 #------------------------------------------------------------------------------
@@ -269,7 +274,7 @@ old_add_suggest_entry() {
 add_upgrade_entry() {
     local cnt=${1:-$UPGRADE_CNT}
     [ $cnt -gt 0 ] || return
-    menu_printf_plural  upgrade $cnt "View or perform %s upgrade now" "View or perform %s upgrades now"
+    menu_printf_plural  upgrade $cnt $"View or perform %s upgrade now" $"View or perform %s upgrades now"
 }
 
 #------------------------------------------------------------------------------
@@ -278,9 +283,9 @@ add_upgrade_entry() {
 upgrade_menu() {
     local cnt=${1:-$UPGRADE_CNT}
 
-    menu_printf_plural upgrade $cnt "Upgrade %s package now" "Upgrade %s packages now"
-    menu_printf        view    "View list of packages to be upgraded"
-    menu_printf        ignore  "Ignore these upgrades for now"
+    menu_printf_plural upgrade $cnt $"Upgrade %s package now" $"Upgrade %s packages now"
+    menu_printf        view    $"View list of packages to be upgraded"
+    menu_printf        ignore  $"Ignore these upgrades for now"
 }
 
 #------------------------------------------------------------------------------
@@ -294,7 +299,7 @@ add_mark_entry() {
 
     [ $cnt -gt 0 ] || return
 
-    menu_printf_plural view-marked "$cnt" "View or install %s marked package"  "View or install %s marked packages"
+    menu_printf_plural view-marked "$cnt" $"View or install %s marked package"  $"View or install %s marked packages"
 }
 
 #------------------------------------------------------------------------------
@@ -306,17 +311,17 @@ add_mark_entry() {
 #------------------------------------------------------------------------------
 do_source_menu() {
 
-    shout_subtitle "Edit-Source Menu"
+    shout_subtitle $"Edit-Source Menu"
 
     while true; do
-        local ans  title="Please select a source file to edit"
+        local ans  title=$"Please select a source file to edit"
         my_select ans "$title" "$(source_menu)"
         case $ans in
             quit) break ;;
         esac
         local file=$ans
         if ! test -e "$file"; then
-            warn "Could not find file %s to edit" "$(pqw $file)"
+            warn $"Could not find file %s to edit" "$(pqw $file)"
             continue
         fi
         nano "$file"
@@ -335,7 +340,7 @@ source_menu() {
         test -e "$file" || continue
         menu_printf "$file" "$(basename "$file")"
     done
-    menu_printf quit "Back to Main"
+    menu_printf quit $"Go back to main menu"
 }
 
 #------------------------------------------------------------------------------
@@ -378,7 +383,7 @@ do_search() {
     # LOOP: new search
     while true; do
         shout
-        shout_subtitle "Search for packages"
+        shout_subtitle $"Search for packages"
 
         local all_str
         get_glob_string all_str
@@ -409,18 +414,18 @@ do_search() {
             start_timer
 
             local TOTAL_MATCHES=0  FOUND_MATCH=
-            count_matches  exact "exact name match"           "exact name matches"
-            count_matches  lead  "leading name match"         "leading name matches"
-            count_matches  name  "any name match"             "any name matches"
-            count_matches  desc  "name or description match"  "name or description matches"
+            count_matches  exact $"exact name match"           $"exact name matches"
+            count_matches  lead  $"leading name match"         $"leading name matches"
+            count_matches  name  $"any name match"             $"any name matches"
+            count_matches  desc  $"name or description match"  $"name or description matches"
 
             echo
-            msg_elapsed_t "searches"
+            msg_elapsed_t $"searches"
             echo
 
             if [ $TOTAL_MATCHES -eq 0 ]; then
-                warn "No matches were found"
-                YES_no "Do you want to try a different search?" && break
+                warn $"No matches were found"
+                YES_no $"Do you want to try a different search?" && break
                 return
             fi
 
@@ -430,11 +435,11 @@ do_search() {
                 # Need to use a file because the commands below are in a subshell
                 rm -f $FOUND_MATCH_FILE
                 local result_menu=$(
-                    add_to_result_menu exact "exact"
-                    add_to_result_menu lead  "leading"
-                    add_to_result_menu name  "total name"
-                    add_to_result_menu desc  "description"
-                    menu_printf  'search'    "Do a different search"
+                    add_to_result_menu exact $"exact"
+                    add_to_result_menu lead  $"leading"
+                    add_to_result_menu name  $"total name"
+                    add_to_result_menu desc  $"description"
+                    menu_printf  'search'    $"Do a different search"
                 )
 
 
@@ -442,8 +447,8 @@ do_search() {
                 read found_match 2>/dev/null <$FOUND_MATCH_FILE
 
                 local menu_result the_string
-                shout "Search Result Menu"
-                local result_title="Please select an action"
+                shout $"Search Result Menu"
+                local result_title=$"Please select an action"
                 my_select 'menu_result' "$result_title" "$result_menu"
                 [ -z "$menu_result" ] && continue
 
@@ -460,7 +465,7 @@ do_search() {
 
                     search) act2=break  ;;
                       quit) return      ;;
-                         *) internal_error "search result menu" "$action" ;;
+                         *) internal_error 'search result menu' "$action" ;;
                 esac
                 break
             done
@@ -470,13 +475,13 @@ do_search() {
             esac
 
             if [ "$action" != 'view' ]; then
-                my_select ans "What next?" "$(search_again_menu)"
+                my_select ans $"What next?" "$(search_again_menu)"
                 case $ans in
                      view-marked) do_view_marked ; return ;;
                           search) break                   ;;
                           review) continue                ;;
                             quit) return                  ;;
-                    *) internal_error "search again menu" "$ans" ;;
+                    *) internal_error 'search again menu' "$ans" ;;
                 esac
             fi
 
@@ -497,18 +502,18 @@ do_search() {
                 (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
                 cat $SEARCH_FILE | number_results                   >> $SEARCH_FILE.nl
 
-                msg "%s packages were found." "$(nq $cnt)"
+                msg $"%s packages were found." "$(nq $cnt)"
                 msg
-                questn "In the next step you will been shown a list of packages that you can scroll"
-                questn "Use %s, %s, %s, and %s to scroll the list" \
+                questn $"In the next step you will been shown a list of packages that you can scroll"
+                questn $"Use %s, %s, %s, and %s to scroll the list" \
                     "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
 
-                questn "Position the package you want near the bottom and then press %s to continue" \
+                questn $"Position the package you want near the bottom and then press %s to continue" \
                     "$(bqq q)"
                 msg
 
-                questn "Press %s to see the list, %s to go the main menu,"  "<$(bqq Enter)>" "'$(bqq q)'"
-                questn "%s to repeat same search, %s to do another search"  "'$(bqq r)'"     "'$(bqq s)'"
+                questn $"Press %s to see the list, %s to go the main menu,"  "<$(bqq Enter)>" "'$(bqq q)'"
+                questn $"%s to repeat same search, %s to do another search"  "'$(bqq r)'"     "'$(bqq s)'"
                 quest "> "
 
                 read -n1 ans
@@ -533,10 +538,10 @@ do_search() {
             # LOOP: enter a number
             while true; do
 
-                questn "Press %s to skip picking a package" "<$enter>"
-                questn "Or enter the number(s) of the package(s) you want to mark or install"
-                questn "Use %s to indicate a range of numbers" "$(bqq -)"
-                questn "%s go to main menu, %s new search, %s see the results again" \
+                questn $"Press %s to skip picking a package" "<$enter>"
+                questn $"Or enter the number(s) of the package(s) you want to mark or install"
+                questn $"Use %s to indicate a range of numbers" "$(bqq -)"
+                questn $"%s go to main menu, %s new search, %s see the results again" \
                     "$(bqq q)<$enter>" "$(bqq s)<$enter>" "$(bqq r)<$enter>"
                 quest "> "
 
@@ -552,7 +557,7 @@ do_search() {
 
                 # Test for chars other than space, digits and comma
                 if ! is_num_range "$input"; then
-                    warn "Invalid input.  Please try again"
+                    warn $"Invalid input.  Please try again"
                     continue
                 fi
 
@@ -567,12 +572,12 @@ do_search() {
                 done
 
                 if [ -n "$bad" ]; then
-                    warn "The following number(s) were out of range: %s" "$bad"
+                    warn $"The following number(s) were out of range: %s" "$bad"
                 fi
 
                 [ -n "$good" ] && break
 
-                warn "No valid numbers were given.  Please try again"
+                warn $"No valid numbers were given.  Please try again"
             done
 
             case $action in
@@ -582,11 +587,11 @@ do_search() {
 
             local full_package=  pack_list=
 
-            msg "Selected package(s)"
+            msg $"Selected package(s)"
             for num in $good; do
                 full_package=$(nl $SEARCH_FILE | sed -n -r "s/^\s*$num\s+//p")
                 if [ -z "$full_package" ]; then
-                    warn "Could not find package number %s" "$num"
+                    warn $"Could not find package number %s" "$num"
                     continue
                 fi
                 show_package "$full_package" $num
@@ -603,10 +608,10 @@ do_search() {
                     mark_all_menu        $SEARCH_FILE
                     menu_printf repeat   $"Repeat the same search"
                     menu_printf search   $"Search again"
-                    menu_printf quit     $"Back to main menu"
+                    menu_printf quit     $"Go back to main menu"
                 )
 
-                my_select 'ans' "Please select an action" "$menu"
+                my_select 'ans' $"Please select an action" "$menu"
 
                 case $ans in
                       info)      package_info "$full_package" ; continue   ;;
@@ -621,7 +626,7 @@ do_search() {
                     repeat) action=continue                                ;;
                     search) action=break                                   ;;
                       quit) return                                         ;;
-                         *) internal_error "2nd search result menu" "$ans" ;;
+                         *) internal_error '2nd search result menu' "$ans" ;;
                 esac
                 break
 
@@ -632,14 +637,14 @@ do_search() {
                    break) break    ;;
             esac
 
-            my_select 'ans' "Now what?" "$(search_again_menu)"
+            my_select 'ans' $"Now what?" "$(search_again_menu)"
 
             case $ans in
             view-marked) do_view_marked ; return        ;;
                  search) break                          ;;
                  review) continue                       ;;
                    quit) return                         ;;
-                      *) internal_error "install menu" "$ans" ;;
+                      *) internal_error 'install menu' "$ans" ;;
             esac
         done
     done
@@ -650,10 +655,10 @@ do_search() {
 # or unmarked a package.
 #------------------------------------------------------------------------------
 search_again_menu() {
-    menu_printf search  "Do a new search"
-    menu_printf review  "See search results again"
+    menu_printf search  $"Do a new search"
+    menu_printf review  $"See search results again"
     add_mark_entry
-    menu_printf quit    "Return to main menu"
+    menu_printf quit    $"Return to main menu"
 }
 
 #------------------------------------------------------------------------------
@@ -723,18 +728,18 @@ number_results() {
 uninstall_package() {
     local ans  full=$1  pack=$(package_name "$1")
 
-    shout_subtitle "Remove / Purge Menu"
+    shout_subtitle $"Remove / Purge Menu"
 
     local ans
     show_package "$full"
-    my_select ans "Please choose an action for this package" "$(uninstall_menu)"
+    my_select ans $"Please choose an action for this package" "$(uninstall_menu)"
     case $ans in
             remove) apt_get_cmd remove  $pack ;;
              purge) apt_get_cmd purge   $pack ;;
            install) apt_get_cmd install $pack ;;
          reinstall) apt_get_cmd --reinstall install $pack ;;
               quit) return  ;;
-              *) internal_error "uninstall menu" "$ans" ;;
+              *) internal_error 'uninstall menu' "$ans" ;;
     esac
     update_package_status
 }
@@ -743,10 +748,10 @@ uninstall_package() {
 # Choices for dealing with an installed package
 #------------------------------------------------------------------------------
 uninstall_menu() {
-    menu_printf remove    "Un-install package [remove package but not its config files]"
-    menu_printf purge     "Purge package [remove package AND its config files]"
-    menu_printf reinstall "Reinstall package [even if it is up to date]"
-    menu_printf install   "Install package [only if it is not up to date]"
+    menu_printf remove    $"Un-install package [remove package but not its config files]"
+    menu_printf purge     $"Purge package [remove package AND its config files]"
+    menu_printf reinstall $"Reinstall package [even if it is up to date]"
+    menu_printf install   $"Install package [only if it is not up to date]"
 }
 
 #------------------------------------------------------------------------------
@@ -765,7 +770,7 @@ apt_get_cmd() {
     msg_elapsed_t "$label"
 
     [ $ret -eq 0 ] && return 0
-    warn "The %s command failed" "$(pqw apt-get)"
+    warn $"The %s command failed" "$(pqw apt-get)"
     return 1
 }
 
@@ -774,10 +779,10 @@ apt_get_cmd() {
 # conversion may not be a good idea.
 #------------------------------------------------------------------------------
 get_glob_string() {
-    local var_nam=$1  enter=$(bqq "Enter")
-    local line1="Please enter the term you want to search for."
-    local line2=$(printf "Standard globbing wildcards %s and %s work." "'$(bqq '*')'" "'$(bqq '?')'")
-    local line3=$(printf "Use an empty string or %s to return to main menu." "'$(bqq q)'<$enter>")
+    local var_nam=$1  enter=$(bqq $"Enter")
+    local line1=$"Please enter the term you want to search for."
+    local line2=$(printf $"Standard globbing wildcards %s and %s work." "'$(bqq '*')'" "'$(bqq '?')'")
+    local line3=$(printf $"Use an empty string or %s to return to main menu." "'$(bqq q)'<$enter>")
 
     title=$(printf "%s\n%s\n\n%s\n" "$line1" "$line2" "$line3")
 
@@ -828,7 +833,7 @@ count_matches() {
 # Count the number of ***'ed packages
 #------------------------------------------------------------------------------
 count_star_matches() {
-    local prefix=$1  lab1=$2  lab2=$3  stars=$4  found="Found"
+    local prefix=$1  lab1=$2  lab2=$3  stars=$4  found=$"Found"
     eval local str=\$${prefix}_str
 
     local cnt=$(star_search "$str" --count)
@@ -875,7 +880,7 @@ add_to_result_menu() {
 
             ;;
 
-        *)  menu_printf "$prefix-view" "View %s %s results" "$(nq $cnt)"  "$lab"  ;;
+        *)  menu_printf "$prefix-view" $"View %s %s results" "$(nq $cnt)"  "$lab"  ;;
     esac
 }
 
@@ -904,20 +909,20 @@ mark_or_install_menu() {
     local package=$(package_name "$match")
     local pq_pack=$(pq $package)
 
-    menu_printf "${prefix}info" "Show more information about package %s" "$pq_pack"
+    menu_printf "${prefix}info" $"Show more information about package %s" "$pq_pack"
 
     if is_installed "$match"; then
-        menu_printf "${prefix}uninstall" "Uninstall package %s" "$pq_pack"
+        menu_printf "${prefix}uninstall" $"Uninstall package %s" "$pq_pack"
         return
     fi
 
     if is_marked "$match"; then
-        menu_printf "${prefix}unmark"   "Unmark package %s"  "$pq_pack"
+        menu_printf "${prefix}unmark"   $"Unmark package %s"  "$pq_pack"
     else
-        menu_printf "${prefix}mark"     "Mark package %s"    "$pq_pack"
+        menu_printf "${prefix}mark"     $"Mark package %s"    "$pq_pack"
     fi
 
-    menu_printf "${prefix}install"   "Install package %s"   "$pq_pack"
+    menu_printf "${prefix}install"      $"Install package %s"   "$pq_pack"
 }
 
 #------------------------------------------------------------------------------
@@ -938,8 +943,8 @@ multi_mark_or_install_menu() {
 
     case $mark_cnt in
         0) ;;
-        1) menu_printf "$to_mark-mark" "Mark selected, uninstalled package %s" "$(pq $to_mark)" ;;
-        *) menu_printf "$to_mark-mark" "Mark %s selected, uninstalled packages" "$(nq $mark_cnt)" ;;
+        1) menu_printf "$to_mark-mark" $"Mark selected, uninstalled package %s" "$(pq $to_mark)" ;;
+        *) menu_printf "$to_mark-mark" $"Mark %s selected, uninstalled packages" "$(nq $mark_cnt)" ;;
     esac
 
     local install_cnt=$(egrep --count "^(M )?($regex) " $db)
@@ -947,8 +952,8 @@ multi_mark_or_install_menu() {
 
      case $install_cnt in
         0) ;;
-        1) menu_printf "$to_install-install" "install selected uninstalled package %s" "$(pq $to_install)" ;;
-        *) menu_printf "$to_install-install" "install %s selected uninstalled packages" "$(nq $install_cnt)" ;;
+        1) menu_printf "$to_install-install" $"install selected uninstalled package %s" "$(pq $to_install)" ;;
+        *) menu_printf "$to_install-install" $"install %s selected uninstalled packages" "$(nq $install_cnt)" ;;
     esac
 }
 
@@ -1027,7 +1032,7 @@ check_list_files() {
 
         local type url repo other root ext
 
-        msg "Checking source files ..."
+        msg $"Checking source files ..."
         while read type url repo other; do
             [ -n "$type" ] || continue
             case $repo in
@@ -1079,17 +1084,17 @@ Read_Sources
         ) >> $LOG_FILE
 
         local apt_get=$(pq apt-get update)
-        local run_now=$(printf "Run %s now?" "$apt_get")
+        local run_now=$(printf $"Run %s now?" "$apt_get")
 
         if [ $LIST_FOUND_CNT -eq 0 ]; then
-            Msg "No list files were found"
-            Msg "An %s is required in order to continue" "$apt_get"
+            Msg $"No list files were found"
+            Msg $"An %s is required in order to continue" "$apt_get"
             # FIXME BACK_TO_MAIN
             YES_no "$run_now" || return 1
 
         elif [ $LIST_ERR_CNT -gt 0 ]; then
-            Msg "It appears that at least one list file is missing"
-            Msg "You should probably run %s now" "$apt_get"
+            Msg $"It appears that at least one list file is missing"
+            Msg $"You should probably run %s now" "$apt_get"
             YES_no "$run_now" || return 0
 
     #--    elif [ $interval -gt $max_interval ]; then
@@ -1143,14 +1148,14 @@ list_error() {
 # regenerate our own database files
 #------------------------------------------------------------------------------
 do_update() {
-    msg "Doing %s" "$(pq apt-get update)"
+    msg $"Doing %s" "$(pq apt-get update)"
 
     apt_get_cmd update
     local ret=$?
 
     if [ $ret -ne 0 ]; then
-        warn "There was a problem running %s" "$(pqw apt-get update)"
-        yes_NO "Do you want to continue anyway" || return 1
+        warn $"There was a problem running %s" "$(pqw apt-get update)"
+        yes_NO $"Do you want to continue anyway" || return 1
     fi
     UPGRADE_CNT=
 
@@ -1166,7 +1171,7 @@ do_update() {
 # version of the list of suggested files.
 #------------------------------------------------------------------------------
 generate_database_files() {
-    msg "Creating database ..."
+    msg $"Creating database ..."
     start_timer
     local db=${1:-$DB_FILE}   installed=${2:-$INSTALLED_FILE}
     list_installed > $installed
@@ -1184,7 +1189,7 @@ generate_database_files() {
         DB_FILE_LIST="$DB_FILE_LIST $to"
     done
 
-    msg_elapsed_t "database generation"
+    msg_elapsed_t $"database generation"
 }
 
 #------------------------------------------------------------------------------
@@ -1235,7 +1240,7 @@ unmark_and_mark_installed() {
     local pack ilist files=$DB_FILE_LIST
 
     start_timer
-    msg "Updating database ..."
+    msg $"Updating database ..."
 
     # Build a regular expression so we only have to edit each file once
     for pack; do
@@ -1246,7 +1251,7 @@ unmark_and_mark_installed() {
     sed -i -r -e "s/^M?I? ?(($ilist) )/I \1/" $files
     MARK_CNT=$(grep --count "^M" $db)
 
-    msg_elapsed_t "database update"
+    msg_elapsed_t $"database update"
 }
 
 #------------------------------------------------------------------------------
@@ -1260,11 +1265,11 @@ mark_package_and_deps() {
 
     # ignore <...> depends for now
     local all_deps=$(list_depends "$pack")
-    msg "found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
+    msg $"found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
     local regex=$(echo $all_deps | tr ' ' '|')
     #echo "regex: $regex"
     local cnt=$(egrep --count "^($regex) " $db)
-    arrow_msg "Marking %s uninstalled dependencies" "$(nq $cnt)"
+    arrow_msg $"Marking %s uninstalled dependencies" "$(nq $cnt)"
     echo $(egrep "^($regex) " $db | sed "s/ .*//")
     sed -i -r "s/^($regex) /M \1 /" $files
     MARK_CNT=$((MARK_CNT + cnt))
@@ -1280,18 +1285,18 @@ mark_package() {
     #testing && return
 
     local all_deps=$(list_depends "$pack")
-    msg "found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
+    msg $"found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
     local regex=$(echo $all_deps | tr ' ' '|')
     #echo "regex: $regex"
     local cnt=$(egrep --count "^($regex) " $db)
-    msg "found %s unmet dependencies" "$(nq $cnt)"
+    msg $"found %s unmet dependencies" "$(nq $cnt)"
     local unmet_deps=$(egrep "^($regex) " $db | sed "s/ .*//")
 
     local fold_width=$(($(screen_width) - 5))
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $pack $unmet_deps)
-    msg "This package and unmet dependencies will take %s Meg" "$(nq $size)"
+    msg $"This package and unmet dependencies will take %s Meg" "$(nq $size)"
 }
 
 
@@ -1304,7 +1309,7 @@ _mark_package() {
     # Don't mark an already marked package
     egrep -q "^(I )?$pack " $db || return
 
-    arrow_msg "Marking package %s" "$(pq $pack)"
+    arrow_msg $"Marking package %s" "$(pq $pack)"
     sed -i -r -e "s/^(I $pack )/M\1/" -e "s/^($pack )/M \1/" $db
     MARK_CNT=$((MARK_CNT + 1))
 }
@@ -1316,7 +1321,7 @@ unmark_package() {
     local pack=$(package_name "$1")  db=${2:-$DB_FILE}
     grep -q "^MI? $pack " $db && return
 
-    arrow_msg "Unmark package %s" "$(pq $pack)"
+    arrow_msg $"Unmark package %s" "$(pq $pack)"
     sed -i -r -e "s/^M(I $pack )/\1/" -e "s/^M ($pack )/\1/" $db
     MARK_CNT=$((MARK_CNT - 1))
 }
@@ -1330,7 +1335,7 @@ unmark_all() {
     local cnt=$(grep --count "^M" $db)
 
     sed -i -r "s/^M ?//" $files
-    arrow_msg "Unmarked %s package(s)" "$(nq $cnt)"
+    arrow_msg $"Unmarked %s package(s)" "$(nq $cnt)"
 
     MARK_CNT=0
 }
@@ -1347,7 +1352,7 @@ package_info() {
 
     local all_deps=$(list_depends "$pack")
     local all_cnt=$(echo $all_deps | wc -w)
-    msg "found %s dependencies" "$(nq $all_cnt)"
+    msg $"found %s dependencies" "$(nq $all_cnt)"
 
     local regex=$(echo $all_deps | tr ' ' '|')
 
@@ -1356,7 +1361,7 @@ package_info() {
     if [ $all_cnt -gt 0 ]; then
         unmet_deps=$(egrep "^(M )?($regex) " $db | sed -r -e "s/^MI? //" -e "s/ .*//")
         local real_cnt=$(echo "$unmet_deps" | wc -l)
-        msg "found %s unmet dependencies" "$(nq $real_cnt)"
+        msg $"found %s unmet dependencies" "$(nq $real_cnt)"
     fi
 
     local unmet_deps=$(egrep "^($regex) " $db | sed "s/ .*//")
@@ -1365,7 +1370,7 @@ package_info() {
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $pack $unmet_deps)
-    msg "This package and dependencies will take %s Meg" "$(nq $size)"
+    msg $"This package and dependencies will take %s Meg" "$(nq $size)"
 
     if testing; then
         press_enter
@@ -1374,7 +1379,7 @@ package_info() {
 
     apt-cache show $pack | show_deb_info
 
-    yes_NO "Do you want to see more detailed information?" || return
+    yes_NO $"Do you want to see more detailed information?" || return
 
     apt-cache show $pack | sed -r "s/^([A-Za-z0-9-]+):/$m_co\1:$nc_co/" | less -MSFR
 
@@ -1405,13 +1410,13 @@ show_deb_info() {
 install_package() {
     local full=$1  pack=$(package_name "$1")  db=${2:-$DB_FILE}
 
-    shout_subtitle "Install package"
+    shout_subtitle $"Install package %s" "$pack"
 
     show_package "$full"
 
     local all_deps=$(list_depends "$pack")
     local all_cnt=$(echo $all_deps | wc -w)
-    msg "found %s dependencies" "$(nq $all_cnt)"
+    msg $"found %s dependencies" "$(nq $all_cnt)"
 
     local regex=$(echo $all_deps | tr ' ' '|')
 
@@ -1420,7 +1425,7 @@ install_package() {
     if [ $all_cnt -gt 0 ]; then
         unmet_deps=$(egrep "^(M )?($regex) " $db | sed -r -e "s/^MI? //" -e "s/ .*//")
         local real_cnt=$(echo "$unmet_deps" | wc -l)
-        msg "found %s unmet dependencies that will also get installed" "$(nq $real_cnt)"
+        msg $"found %s unmet dependencies that will also get installed" "$(nq $real_cnt)"
     fi
 
     local unmet_deps=$(egrep "^($regex) " $db | sed "s/ .*//")
@@ -1429,10 +1434,10 @@ install_package() {
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $pack $unmet_deps)
-    msg "This package and unmet dependencies will take %s Meg" "$(nq $size)"
-    YES_no "Do you want to install this package now?" || return
+    msg $"This package and unmet dependencies will take %s Meg" "$(nq $size)"
+    YES_no $"Do you want to install this package now?" || return
 
-    msg "Installing %s" "$(pq $pack)"
+    msg $"Installing %s" "$(pq $pack)"
     apt_get_cmd install "$pack $(echo $unmet_deps)"
 
     unmark_and_mark_installed $pack $unmet_deps
@@ -1447,10 +1452,10 @@ install_marked() {
 
     local packs=$(grep "^M " $file | sed -e "s/^M //" -e "s/ .*//")
     local cnt=$(echo $packs | wc -w)
-    msg "Found %s un-installed marked packages" "$(nq $cnt)"
+    msg $"Found %s un-installed marked packages" "$(nq $cnt)"
 
     if [ $cnt -le 0 ]; then
-        warn "Nothing to install"
+        warn $"Nothing to install"
         return
     fi
     install_list "$(echo $packs)"
@@ -1461,13 +1466,13 @@ install_marked() {
 #------------------------------------------------------------------------------
 install_list() {
     local packs=$1  db=$DB_FILE
-    msg "Install package(s)"
+    msg $"Install package(s)"
     local fold_width=$(($(screen_width) - 5))
     echo $packs | fold -s -w $fold_width
 
     local all_deps=$(list_depends $packs)
     local all_cnt=$(echo $all_deps | wc -w)
-    msg "found %s dependencies" "$(nq $all_cnt)"
+    msg $"found %s dependencies" "$(nq $all_cnt)"
 
     local regex=$(echo $all_deps | tr ' ' '|')
 
@@ -1476,14 +1481,14 @@ install_list() {
     if [ $all_cnt -gt 0 ]; then
         unmet_deps=$(egrep "^(M )?($regex) " $db | sed -r -e "s/^MI? //" -e "s/ .*//")
         local real_cnt=$(echo "$unmet_deps" | wc -l)
-        msg "found %s unmet dependencies that will also get installed" "$(nq $real_cnt)"
+        msg $"found %s unmet dependencies that will also get installed" "$(nq $real_cnt)"
         log_it_q echo $unmet_deps | fold -w $fold_width -s
     fi
 
     local size=$(package_size $packs $unmet_deps)
-    msg "The package(s) and dependencies will take %s Meg" "$(nq $size)"
+    msg $"The package(s) and dependencies will take %s Meg" "$(nq $size)"
 
-    YES_no "Install these packages?" || return
+    YES_no $"Install these packages?" || return
     apt_get_cmd install $(echo $packs)
 
     unmark_and_mark_installed $(echo $packs $unmet_depends)
@@ -1523,9 +1528,9 @@ package_size() {
 mark_menu() {
     [ $MARK_CNT -gt 0 ] || return
     local cnt=$MARK_CNT
-    menu_printf_plural install-marked "$cnt" "Install %s marked package"  "Install all %s marked packages"
-    menu_printf_plural    view-marked "$cnt" "View %s marked package"     "View all %s marked packages"
-    menu_printf_plural     unmark-all "$cnt" "Unmark %s marked package"   "Unmark all %s marked packages"
+    menu_printf_plural install-marked "$cnt" $"Install %s marked package"  $"Install all %s marked packages"
+    menu_printf_plural    view-marked "$cnt" $"View %s marked package"     $"View all %s marked packages"
+    menu_printf_plural     unmark-all "$cnt" $"Unmark %s marked package"   $"Unmark all %s marked packages"
 }
 
 #------------------------------------------------------------------------------
@@ -1534,7 +1539,7 @@ mark_menu() {
 do_view_marked() {
     local db=${1:-$DB_FILE}  local mark_co=
 
-    shout_subtitle "View or Install Marked Packages"
+    shout_subtitle $"View or Install Marked Packages"
 
     while true; do
 
@@ -1546,27 +1551,27 @@ do_view_marked() {
         fi
 
         if [ $cnt -le 0 ]; then
-            warn "No marked packages were found"
+            warn $"No marked packages were found"
             return
         fi
 
         local menu=$(
             mark_menu
-            menu_printf quit "Back to main"
+            menu_printf quit $"Go back to main menu"
         )
 
         local marked_size=$(marked_size)
-        msg "Marked packages(s) will add %s Meg" "$(nq $marked_size)"
+        msg $"Marked packages(s) will add %s Meg" "$(nq $marked_size)"
 
         local ans
-        my_select ans "Please select an action" "$menu"
+        my_select ans $"Please select an action" "$menu"
 
         case $ans in
              view-marked)                         ;;
           install-marked) install_marked ; return ;;
               unmark-all) unmark_all     ; return ;;
                     quit) return                  ;;
-                    *) internal_error "view mark menu" "$ans"
+                    *) internal_error 'view mark menu' "$ans"
         esac
 
         local height=$(screen_height)
@@ -1578,16 +1583,16 @@ do_view_marked() {
             (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
             cat $SEARCH_FILE | color_results                    >> $SEARCH_FILE.nl
 
-            msg "%s packages were found." $cnt
+            msg $"%s packages were found." $cnt
             msg
-            questn "In the next step you will been shown a list of packages that you can scroll"
+            questn $"In the next step you will been shown a list of packages that you can scroll"
 
-            questn "Use %s, %s, %s, and %s to scroll the list" \
+            questn $"Use %s, %s, %s, and %s to scroll the list" \
                 "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
 
-            questn "Position the package you want near the bottom and then press 'q' to continue"
+            questn $"Position the package you want near the bottom and then press %s to continue" "$(bqq q)"
             msg
-            questn "Press %s to see the list, %s to go the main menu, %s to do another search" \
+            questn $"Press %s to see the list, %s to go the main menu, %s to do another search" \
                 "<$(bqq "Enter")>" "'$(bqq q)'" "'$(bqq s)'"
 
             read ans
@@ -1617,7 +1622,7 @@ do_suggested() {
     local ans
     while true; do
 
-        shout_subtitle "Suggested %s Packages" "$title"
+        shout_subtitle $"Suggested %s Packages" "$title"
 
         local   all_str="^[MIa-z0-9]"
         local  five_str="^[MIa-z0-9].*\*{5}"
@@ -1631,17 +1636,17 @@ do_suggested() {
         local all_match=  five_match=  four_match=  three_match=  two_match=  one_match=
 
         local TOTAL_MATCHES=0  FOUND_MATCH=
-        count_star_matches   all   "total suggestion" "total suggestions"
-        count_star_matches  five   "star package"     "star packages"  "*****"
-        count_star_matches  four   "star package"     "star packages"  "****+"
-        count_star_matches three   "star package"     "star packages"  "***+"
+        count_star_matches   all   $"total suggestion" $"total suggestions"
+        count_star_matches  five   $"star package"     $"star packages"  "*****"
+        count_star_matches  four   $"star package"     $"star packages"  "****+"
+        count_star_matches three   $"star package"     $"star packages"  "***+"
         #count_star_matches   two   "package"     "star packages  "**+""
         #count_star_matches   one   "package"     "star packages" "*+"
-        count_star_matches   zero  "zero star package"  "no star packages" ""
+        count_star_matches   zero  $"zero star package"  $"no star packages" ""
 
         if [ $TOTAL_MATCHES -eq 0 ]; then
-            warn "No suggestions were found!"
-            warn "Check for the file %s" $SUGGESTED_FILE
+            warn $"No suggestions were found!"
+            warn $"Check for the file %s" $SUGGESTED_FILE
             return
         fi
 
@@ -1649,18 +1654,18 @@ do_suggested() {
         rm -f $FOUND_MATCH_FILE
         local star_menu=$(
             [ $mark_cnt -gt 0 ] && add_mark_entry
-            add_to_star_menu all    "View all" "suggestions"
-            add_to_star_menu five   "View"     "star packages"      "*****"
-            add_to_star_menu four   "View"     "star packages"      "****+"
-            add_to_star_menu three  "View"     "star packages"      "***+"
-            add_to_star_menu zero   "View"     "zero star packages" ""
-            menu_printf             skip       "Skip to next step (don't view packages)"
+            add_to_star_menu all    $"View all" $"suggestions"
+            add_to_star_menu five   $"View"     $"star packages"      "*****"
+            add_to_star_menu four   $"View"     $"star packages"      "****+"
+            add_to_star_menu three  $"View"     $"star packages"      "***+"
+            add_to_star_menu zero   $"View"     $"zero star packages" ""
+            menu_printf             skip        $"Skip to next step (don't view packages)"
             #add_to_star_menu
-            menu_printf  'quit'    "Go back to main menu"
+            menu_printf  'quit'    $"Go back to main menu"
         )
 
         local ans
-        my_select ans "Please select which packages to view" "$star_menu"
+        my_select ans $"Please select which packages to view" "$star_menu"
 
         local action=${ans#*-}
         local search_type=${ans%%-*}
@@ -1672,7 +1677,7 @@ do_suggested() {
               *-view) eval regex=\$${search_type}_str ;;
                 skip) skip=true                       ;;
                 quit) return                          ;;
-                   *) internal_error "star menu 1" "$ans" ;;
+                   *) internal_error 'star menu 1' "$ans" ;;
         esac
 
         if [ "$action" = 'view' ]; then
@@ -1694,17 +1699,17 @@ do_suggested() {
             (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
             cat $SEARCH_FILE | number_suggestions               >> $SEARCH_FILE.nl
 
-            local enter="$(bqq "Enter")"
+            local enter="$(bqq $"Enter")"
             local ucnt=$(egrep --count "^(M |[a-z0-9])" $SEARCH_FILE)
 
-            msg "%s packages were found (%s uninstalled)." "$(nq $pack_cnt)" "$(nq $ucnt)"
+            msg $"%s packages were found (%s uninstalled)." "$(nq $pack_cnt)" "$(nq $ucnt)"
 
             msg
-            questn "In the next step you will been shown a list of packages that you can scroll"
-            questn "Use <up-arrow>, <down-arrow>, <page-up>, and <page down> to scroll the list"
-            questn "Position the package you want near the bottom and then press 'q' to continue"
+            questn $"In the next step you will been shown a list of packages that you can scroll"
+            questn $"Use <up-arrow>, <down-arrow>, <page-up>, and <page down> to scroll the list"
+            questn $"Position the package you want near the bottom and then press 'q' to continue"
             msg
-            questn "press %s to see the list, %s to go the main menu, %s to search again" \
+            questn $"Press %s to see the list, %s to go the main menu, %s to search again" \
                 "<$enter>" "$(bqq q)" "$(bqq r)"
 
             local xxx
@@ -1722,15 +1727,15 @@ do_suggested() {
             less -RXSm +$offset --shift=.20 $SEARCH_FILE.nl
         fi
 
-        local action=  enter=$(bqq "Enter")
+        local action=  enter=$(bqq $"Enter")
 
         # LOOP: enter a number
         while true; do
             [ "$skip" ] && break
-            questn "Press %s to skip picking a package" "<$enter>"
-            questn "Or enter the number(s) of the package(s) you want to mark or install"
-            questn "Use %s to indicate a range of numbers" "$(bqq -)"
-            questn "Use %s to go to main menu, %s to see the results again" "$(bqq q)<$enter>" "$(bqq r)<$enter>"
+            questn $"Press %s to skip picking a package" "<$enter>"
+            questn $"Or enter the number(s) of the package(s) you want to mark or install"
+            questn $"Use %s to indicate a range of numbers" "$(bqq -)"
+            questn $"Use %s to go to main menu, %s to see the results again" "$(bqq q)<$enter>" "$(bqq r)<$enter>"
             quest "> "
 
             local input=
@@ -1744,7 +1749,7 @@ do_suggested() {
 
             # Test for chars other than space, digits and comma
             if ! is_num_range "$input"; then
-                warn "Invalid input.  Please try again"
+                warn $"Invalid input.  Please try again"
                 continue
             fi
 
@@ -1759,12 +1764,12 @@ do_suggested() {
             done
 
             if [ -n "$bad" ]; then
-                warn "The following number(s) were out of range: %s" "$bad"
+                warn $"The following number(s) were out of range: %s" "$bad"
             fi
 
             [ -n "$good" ] && break
 
-            warn "No valid numbers were given.  Please try again"
+            warn $"No valid numbers were given.  Please try again"
         done
 
         case $action in
@@ -1774,11 +1779,11 @@ do_suggested() {
 
         local full_package=  pack_list=
 
-        msg "Selected package(s)"
+        msg $"Selected package(s)"
         for num in $good; do
             full_package=$(cat $SEARCH_FILE |  my_nl | sed -n -r "s/^\s*$num\s+//p")
             if [ -z "$full_package" ]; then
-                warn "Could not find package number %s" "$num"
+                warn $"Could not find package number %s" "$num"
                 continue
             fi
             show_package "$full_package" $num
@@ -1794,10 +1799,10 @@ do_suggested() {
                 mark_all_menu        $SEARCH_FILE
                 install_all_menu     $SEARCH_FILE
                 menu_printf suggest  $"See suggestions again"
-                menu_printf quit     $"Back to main menu"
+                menu_printf quit     $"Go back to main menu"
             )
 
-            my_select ans "Please select an action" "$menu"
+            my_select ans $"Please select an action" "$menu"
 
             case $ans in
                       info)        package_info "$full_package" ; continue ;;
@@ -1812,7 +1817,7 @@ do_suggested() {
             install-marked)     install_marked  $SEARCH_FILE               ;;
                    suggest) action=continue                                ;;
                       quit) return                                         ;;
-                        *) internal_error "bottom suggestion menu" "$ans" ;;
+                        *) internal_error 'bottom suggestion menu' "$ans" ;;
             esac
 
             mark_cnt=$(grep --count "^M" $SUGGESTED_FILE)
@@ -1871,22 +1876,22 @@ mark_list() {
     #sed -r -i -e "s/^I ($regex) /MI \1 /" -e "s/^($regex) /M \1 /" $files
     sed -r -i "s/^($regex) /M \1 /" $files
     local cnt=$(echo $packs | wc -w)
-    arrow_msg "Marked %s previously unmarked packages" "$(nq $cnt)"
+    arrow_msg $"Marked %s previously unmarked packages" "$(nq $cnt)"
     MARK_CNT=$((MARK_CNT + cnt))
 
     local all_deps=$(list_depends $(echo $packs))
 
-    msg "found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
+    msg $"found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
     regex=$(echo $all_deps | tr ' ' '|')
     local unmet_deps=$(egrep "^($regex) " $db | sed "s/ .*//")
     cnt=$(echo "$unmet_deps" | wc -l)
-    msg "found %s unmet dependencies" "$(nq $cnt)"
+    msg $"found %s unmet dependencies" "$(nq $cnt)"
 
     local fold_width=$(($(screen_width) - 5))
     log_it_q echo $unmet_deps | fold -w $fold_width -s
 
     local size=$(package_size $packs $unmet_deps)
-    msg "The package(s) and unmet dependencies will take %s Meg" "$(nq $size)"
+    msg $"The package(s) and unmet dependencies will take %s Meg" "$(nq $size)"
 }
 
 #------------------------------------------------------------------------------
@@ -1900,11 +1905,11 @@ unmark_all_file() {
     sed -r -i -e "s/^M ($regex) /\1 /" -e "s/^MI ($regex) /I \1 /"  $files
 
     local cnt=$(echo $packs | wc -w)
-    arrow_msg "Unmarked all %s previously marked packages" "$(nq $cnt)"
+    arrow_msg $"Unmarked all %s previously marked packages" "$(nq $cnt)"
 
     local mcnt=$(grep --count "^M" $DB_FILE)
     if [ $mcnt -gt 0 ]; then
-        msg "%s package(s) are still marked" "$(nq $mcnt)"
+        msg $"%s package(s) are still marked" "$(nq $mcnt)"
     fi
 
     MARK_CNT=$((MARK_CNT - cnt))
@@ -1923,10 +1928,10 @@ mark_all_menu() {
     local   marked=$(egrep --count "^M"          $file)
 
     [ $can_mark -gt 0 ] \
-        && menu_printf_plural   mark-all $can_mark "Mark %s unmarked, uninstalled package" "Mark %s unmarked, uninstalled packages"
+        && menu_printf_plural   mark-all $can_mark $"Mark %s unmarked, uninstalled package" $"Mark %s unmarked, uninstalled packages"
 
     [ $marked -gt 0 ]\
-        && menu_printf_plural unmark-all $marked   "Unmark %s marked package" "Unmark %s marked packages"
+        && menu_printf_plural unmark-all $marked   $"Unmark %s marked package" $"Unmark %s marked packages"
 
     #[ $marked -gt 0 ] \
     #    && menu_printf_plural install-marked "$marked" "Install %s marked package"  "Install all %s marked packages"
@@ -1944,7 +1949,7 @@ install_all_menu() {
     local   marked=$(egrep --count "^M"          $file)
 
     [ $marked -gt 0 ] \
-        && menu_printf_plural install-marked "$marked" "Install %s marked package"  "Install all %s marked packages"
+        && menu_printf_plural install-marked "$marked" $"Install %s marked package"  $"Install all %s marked packages"
 }
 #------------------------------------------------------------------------------
 # Used for number only packages inside of the suggestion file.  We only number
@@ -2025,13 +2030,13 @@ count_upgrades() { apt list --upgradable 2>/dev/null | grep -v "^Listing" | wc -
 # Check to for system upgrades
 #------------------------------------------------------------------------------
 check_for_upgrades() {
-    msg "Checking for package upgrades ..."
+    msg $"Checking for package upgrades ..."
     UPGRADE_CNT=$(count_upgrades)
     if [ $UPGRADE_CNT -eq 0 ]; then
         #msg "nothing to upgrade"
         return
     fi
-    msg "There are %s packages that can be upgraded" "$(nq $UPGRADE_CNT)"
+    msg $"There are %s packages that can be upgraded" "$(nq $UPGRADE_CNT)"
     do_upgrade_menu 3
 }
 
@@ -2043,21 +2048,21 @@ do_upgrade_menu() {
 
     : ${UPGRADE_CNT:=$(count_upgrades)}
     if [ $UPGRADE_CNT -eq 0 ]; then
-        warn "There are no packages to upgrade"
+        warn $"There are no packages to upgrade"
         return
     fi
 
-    shout_subtitle "System Upgrade Menu"
+    shout_subtitle $"System Upgrade Menu"
 
     while true; do
         local ans
-        my_select ans "Please select an action" "$(upgrade_menu $UPGRADE_CNT)" "" $default_entry
+        my_select ans $"Please select an action" "$(upgrade_menu $UPGRADE_CNT)" "" $default_entry
         case $ans in
              ignore) return              ;;
                quit) return              ;;
             upgrade) do_upgrade ; return ;;
                view) view_upgrades       ;;
-                  *) internal_error "upgrade_menu" "$ans" ;;
+                  *) internal_error 'upgrade_menu' "$ans" ;;
         esac
     done
 }
