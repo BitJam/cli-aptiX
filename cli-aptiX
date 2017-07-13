@@ -17,6 +17,7 @@ MAIN_TITLE="antiX CLI Package Installer"
 MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
    LIB_DIR="/usr/local/lib/cli-shell-utils"
 
+GRAPHICAL_MENUS=true
 export TEXTDOMAIN="cli-aptiX"
 
   LIB_PATH="$MY_LIB_DIR:$LIB_DIR"
@@ -61,8 +62,10 @@ Search for, mark, and install Debian-based packages.
 
 Options:
     -C --color=<xxx>   Set color scheme to off|low|low2|bw|dark|high
+    -G --graphic-ui    Use the new graphics user interface (default)
     -h --help          Show this usage
-       --pause         Puase before exiting
+    -N --numeric-ui    Use the legacy numerical user interface
+       --pause         Pause before exiting
 Usage
     exit $ret
 }
@@ -84,8 +87,10 @@ eval_early_argument() {
 eval_argument() {
     local arg=$1  val=$2
     case $arg in
+   -graphic-ui|G) GRAPHICAL_MENUS=true              ;;
         -color|C)  COLOR_SCHEME=$val                ;;
         -color=*)  COLOR_SCHEME=$val                ;;
+   -numeric-ui|N) GRAPHICAL_MENUS=                  ;;
           -pause)                                   ;;
 
           *)  fatal "Unknown parameter %s" "-$arg"  ;;
@@ -107,7 +112,7 @@ takes_param() {
 # and so on.   Could that be a submenu???
 #------------------------------------------------------------------------------
 main() {
-    local SHORT_STACK="Ch"
+    local SHORT_STACK="CGhN"
 
     read_early_params "$@"
 
