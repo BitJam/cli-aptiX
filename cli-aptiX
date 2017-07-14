@@ -530,16 +530,16 @@ do_search() {
                 questn $"In the next step you will be shown a list of packages that you can scroll"
                 # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
                 questn $"Use %s, %s, %s, and %s to scroll the list" \
-                    "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
+                    "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
 
                 questn $"Position the package you want near the bottom and then press %s to continue" \
-                    "'$(bqq q)'"
+                    "'$(pqq q)'"
                 msg
 
                 # Press <enter> to see the list, 'q' to go to the main menu
-                questn $"Press %s to see the list, %s to go to the main menu,"  "<$(bqq Enter)>" "'$(bqq q)'"
+                questn $"Press %s to see the list, %s to go to the main menu,"  "<$(pqq Enter)>" "'$(pqq q)'"
                 # [Press] 'r' to repeat the same search, 's' to do new search
-                questn $"%s to repeat same search, %s to do new search"  "'$(bqq r)'"     "'$(bqq s)'"
+                questn $"%s to repeat same search, %s to do new search"  "'$(pqq r)'"     "'$(pqq s)'"
                 quest "> "
 
                 read -n1 ans
@@ -559,7 +559,7 @@ do_search() {
 
             # This loop is to repeat the 'number' input if needed.
             # The action variable helps us to figure out what to do in the surrounding loop
-            local action enter=$(bqq "Enter")
+            local action enter=$(pqq "Enter")
 
             # LOOP: enter a number
             while true; do
@@ -567,10 +567,10 @@ do_search() {
                 questn $"Press %s to skip picking a package" "<$enter>"
                 questn $"Or enter the number(s) of the package(s) you want to mark or install"
                 # Use '-' to indicate a range of numbers
-                questn $"Use %s to indicate a range of numbers" "$(bqq -)"
+                questn $"Use %s to indicate a range of numbers" "$(pqq -)"
                 # [Use] 'q<enter>' to go the main menu, 'r<enter>' see the results again, 's<enter>' to do a new search
                 questn $"%s to go to main menu, %s to see the results again, %s to do a new search" \
-                    "$(bqq q)<$enter>" "$(bqq r)<$enter>" "$(bqq s)<$enter>"
+                    "$(pqq q)<$enter>" "$(pqq r)<$enter>" "$(pqq s)<$enter>"
                 quest "> "
 
                 local input=
@@ -808,10 +808,10 @@ apt_get_cmd() {
 #------------------------------------------------------------------------------
 get_glob_string() {
     # The Enter key
-    local var_nam=$1  enter=$(bqq $"Enter")
+    local var_nam=$1  enter=$(pqq $"Enter")
     local line1=$"Please enter the term you want to search for"
-    local line2=$(printf $"Standard globbing wildcards %s and %s work" "'$(bqq '*')'" "'$(bqq '?')'")
-    local line3=$(printf $"Use an empty string or %s to return to main menu" "'$(bqq q)'<$enter>")
+    local line2=$(printf $"Standard globbing wildcards %s and %s work" "'$(pqq '*')'" "'$(pqq '?')'")
+    local line3=$(printf $"Use an empty string or %s to return to main menu" "$(pqq q)<$enter>")
 
     title=$(printf "%s\n%s\n\n%s\n" "$line1" "$line2" "$line3")
 
@@ -1623,12 +1623,12 @@ do_view_marked() {
             questn $"In the next step you will been shown a list of packages that you can scroll"
 
             questn $"Use %s, %s, %s, and %s to scroll the list" \
-                "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
+                "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
 
-            questn $"Position the package you want near the bottom and then press %s to continue" "'$(bqq q)'"
+            questn $"Position the package you want near the bottom and then press %s to continue" "'$(pqq q)'"
             msg
             questn $"Press %s to see the list, %s to go the main menu, %s to do another search" \
-                "<$(bqq "Enter")>" "'$(bqq q)'" "'$(bqq s)'"
+                "<$(pqq "Enter")>" "'$(pqq q)'" "'$(pqq s)'"
 
             read ans
             case $ans in
@@ -1746,7 +1746,7 @@ do_suggested() {
             (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
             cat $SEARCH_FILE | number_suggestions               >> $SEARCH_FILE.nl
 
-            local enter="$(bqq $"Enter")"
+            local enter="$(pqq $"Enter")"
             local ucnt=$(egrep --count "^(M |[a-z0-9])" $SEARCH_FILE)
 
             msg $"%s packages were found (%s uninstalled)" "$(nq $pack_cnt)" "$(nq $ucnt)"
@@ -1755,11 +1755,11 @@ do_suggested() {
             questn $"In the next step you will been shown a list of packages that you can scroll"
             # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
             questn $"Use %s, %s, %s, and %s to scroll the list" \
-                "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
-            questn $"Position the package you want near the bottom and then press %s to continue" "'$(bqq q)'"
+                "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
+            questn $"Position the package you want near the bottom and then press %s to continue" "'$(pqq q)'"
             msg
             questn $"Press %s to see the list, %s to go the main menu, %s to search again" \
-                "<$enter>" "$(bqq q)" "$(bqq r)"
+                "<$enter>" "$(pqq q)" "$(pqq r)"
 
             local xxx
             read -n1 ans
@@ -1776,15 +1776,15 @@ do_suggested() {
             less -RXSm +$offset --shift=.20 $SEARCH_FILE.nl
         fi
 
-        local action=  enter=$(bqq $"Enter")
+        local action=  enter=$(pqq $"Enter")
 
         # LOOP: enter a number
         while true; do
             [ "$skip" ] && break
             questn $"Press %s to skip picking a package" "<$enter>"
             questn $"Or enter the number(s) of the package(s) you want to mark or install"
-            questn $"Use %s to indicate a range of numbers" "$(bqq -)"
-            questn $"Use %s to go to main menu, %s to see the results again" "$(bqq q)<$enter>" "$(bqq r)<$enter>"
+            questn $"Use %s to indicate a range of numbers" "$(pqq -)"
+            questn $"Use %s to go to main menu, %s to see the results again" "$(pqq q)<$enter>" "$(pqq r)<$enter>"
             quest "> "
 
             local input=
