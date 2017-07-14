@@ -117,6 +117,9 @@ takes_param() {
 main() {
     local SHORT_STACK="CGhN"
 
+    # Keyboard keys: up-arrow, down-arrow, page-up, page-down
+    local UP_ARROW=$"up-arrow"  DOWN_ARROW=$"down-arrow" PAGE_UP=$"page-up" PAGE_DOWN=$"page-down"
+
     read_early_params "$@"
 
     testing || need_root
@@ -530,7 +533,7 @@ do_search() {
                 questn $"In the next step you will be shown a list of packages that you can scroll"
                 # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
                 questn $"Use %s, %s, %s, and %s to scroll the list" \
-                    "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
+                    "<$(pqq $UP_ARROW)>" "<$(pqq $DOWN_ARROW)>" "<$(pqq $PAGE_UP)>" "<$(pqq $PAGE_DOWN)>"
 
                 questn $"Position the package you want near the bottom and then press %s to continue" \
                     "'$(pqq q)'"
@@ -1623,7 +1626,7 @@ do_view_marked() {
             questn $"In the next step you will been shown a list of packages that you can scroll"
 
             questn $"Use %s, %s, %s, and %s to scroll the list" \
-                "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
+                "<$(pqq $UP_ARROW)>" "<$(pqq $DOWN_ARROW)>" "<$(pqq $PAGE_UP)>" "<$(pqq $PAGE_DOWN)>"
 
             questn $"Position the package you want near the bottom and then press %s to continue" "'$(pqq q)'"
             msg
@@ -1753,9 +1756,11 @@ do_suggested() {
 
             msg
             questn $"In the next step you will been shown a list of packages that you can scroll"
+
             # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
             questn $"Use %s, %s, %s, and %s to scroll the list" \
-                "<$(pqq up-arrow)>" "<$(pqq down-arrow)>" "<$(pqq page-up)>" "<$(pqq page-down)>"
+                "<$(pqq $UP_ARROW)>" "<$(pqq $DOWN_ARROW)>" "<$(pqq $PAGE_UP)>" "<$(pqq $PAGE_DOWN)>"
+
             questn $"Position the package you want near the bottom and then press %s to continue" "'$(pqq q)'"
             msg
             questn $"Press %s to see the list, %s to go the main menu, %s to search again" \
