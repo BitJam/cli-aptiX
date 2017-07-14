@@ -133,7 +133,7 @@ main() {
     # Used in my_select() to return instead of exit on 'q'
     :
     # First letter is lowercase
-    BACK_TO_MAIN=$"go back to main menu"
+    BACK_TO_MAIN=$"go back to the main menu"
 
     local UPGRADE_CNT
 
@@ -357,7 +357,7 @@ source_menu() {
         menu_printf "$file" "$(basename "$file")"
     done
     # First letter is uppercase
-    menu_printf quit $"Go back to main menu"
+    menu_printf quit $"Go back to the main menu"
 }
 
 #------------------------------------------------------------------------------
