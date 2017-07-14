@@ -30,7 +30,10 @@ export TEXTDOMAIN="cli-aptiX"
   SUGGESTED_DIR=/usr/local/share/$ME/suggested
 
   SUGGEST_TYPES="cli gui"
- SUGGEST_TITLES=cli:$"Command Line"\\ngui:$"GUI"
+ # The category of command line programs
+ SUGGEST_TITLES=cli:$"Command Line"\\n
+ # The catatory of GUI (graphics user interface) programs
+ SUGGEST_TITLES=${SUGGEST_TITLES}gui:$"GUI"\\n
 
    THE_LOG_FILE=/var/log/$ME.log
 
@@ -232,6 +235,7 @@ suggest_warning() {
     local cnt=$(egrep -v "^M?I" $file | egrep --count "^[MIa-z0-9]")
     [ $cnt -gt 0 ] && return
     [ $tot -eq 0 ] && return
+    # all <25> suggested <GUI> packages have been installed
     msg $"All %s suggested %s packages have been installed" "$tot" "$title"
 }
 
@@ -252,6 +256,7 @@ add_suggest_entry() {
     test -r $file || return
     local cnt=$(egrep "^[MIa-z0-9]" $file | egrep --count -v "^M?I")
     [ $cnt -gt 0 ] || return
+    # View a list of <32> suggested <Command Line> packages
     menu_printf suggested-$type $"View a list of %s suggested %s packages" "$(nq $cnt)" "$title"
 }
 
@@ -290,7 +295,7 @@ upgrade_menu() {
     local cnt=${1:-$UPGRADE_CNT}
 
     menu_printf_plural upgrade $cnt $"Upgrade %s package now" $"Upgrade %s packages now"
-    menu_printf        view    $"View list of packages to be upgraded"
+    menu_printf        view    $"View a list of packages to be upgraded"
     menu_printf        ignore  $"Ignore these upgrades for now"
 }
 
@@ -317,7 +322,7 @@ add_mark_entry() {
 #------------------------------------------------------------------------------
 do_source_menu() {
 
-    shout_subtitle $"Edit-Source Menu"
+    shout_subtitle $"Edit Source Menu"
 
     while true; do
         local ans  title=$"Please select a source file to edit"
@@ -420,12 +425,17 @@ do_search() {
             start_timer
 
             local TOTAL_MATCHES=0  FOUND_MATCH=
+            # An "exact name match" means the search term matches the entire package name
             count_matches  exact $"exact name match"           $"exact name matches"
+            # A "leading name match"the search term matches  the beginning of the package name
             count_matches  lead  $"leading name match"         $"leading name matches"
+            # An "any name match" the search term matches any part of the package name
             count_matches  name  $"any name match"             $"any name matches"
+            # A "name or description match"  matches any part of the package name or description
             count_matches  desc  $"name or description match"  $"name or description matches"
 
             echo
+            # searches <took 0.25 seconds>
             msg_elapsed_t $"searches"
             echo
 
@@ -441,9 +451,13 @@ do_search() {
                 # Need to use a file because the commands below are in a subshell
                 rm -f $FOUND_MATCH_FILE
                 local result_menu=$(
+                    # As in "exact match", search term matches these packages exactly
                     add_to_result_menu exact $"exact"
+                    # As in "leading match", search term matches the beginning of these packages
                     add_to_result_menu lead  $"leading"
-                    add_to_result_menu name  $"total name"
+                    # As in "any match' search term matches somewhere in the package name
+                    add_to_result_menu name  $"any name"
+                    # As in "name or description match" search term matches somewhere in the name or description
                     add_to_result_menu desc  $"description"
                     menu_printf  'search'    $"Do a different search"
                 )
@@ -508,18 +522,21 @@ do_search() {
                 (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
                 cat $SEARCH_FILE | number_results                   >> $SEARCH_FILE.nl
 
-                msg $"%s packages were found." "$(nq $cnt)"
+                msg $"%s packages were found" "$(nq $cnt)"
                 msg
-                questn $"In the next step you will been shown a list of packages that you can scroll"
+                questn $"In the next step you will be shown a list of packages that you can scroll"
+                # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
                 questn $"Use %s, %s, %s, and %s to scroll the list" \
                     "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
 
                 questn $"Position the package you want near the bottom and then press %s to continue" \
-                    "$(bqq q)"
+                    "'$(bqq q)'"
                 msg
 
-                questn $"Press %s to see the list, %s to go the main menu,"  "<$(bqq Enter)>" "'$(bqq q)'"
-                questn $"%s to repeat same search, %s to do another search"  "'$(bqq r)'"     "'$(bqq s)'"
+                # Press <enter> to see the list, 'q' to go to the main menu
+                questn $"Press %s to see the list, %s to go to the main menu,"  "<$(bqq Enter)>" "'$(bqq q)'"
+                # [Press] 'r' to repeat the same search, 's' to do new search
+                questn $"%s to repeat same search, %s to do new search"  "'$(bqq r)'"     "'$(bqq s)'"
                 quest "> "
 
                 read -n1 ans
@@ -546,9 +563,11 @@ do_search() {
 
                 questn $"Press %s to skip picking a package" "<$enter>"
                 questn $"Or enter the number(s) of the package(s) you want to mark or install"
+                # Use '-' to indicate a range of numbers
                 questn $"Use %s to indicate a range of numbers" "$(bqq -)"
-                questn $"%s go to main menu, %s new search, %s see the results again" \
-                    "$(bqq q)<$enter>" "$(bqq s)<$enter>" "$(bqq r)<$enter>"
+                # [Use] 'q<enter>' to go the main menu, 'r<enter>' see the results again, 's<enter>' to do a new search
+                questn $"%s to go to main menu, %s to see the results again, %s to do a new search" \
+                    "$(bqq q)<$enter>" "$(bqq r)<$enter>" "$(bqq s)<$enter>"
                 quest "> "
 
                 local input=
@@ -734,7 +753,7 @@ number_results() {
 uninstall_package() {
     local ans  full=$1  pack=$(package_name "$1")
 
-    shout_subtitle $"Remove / Purge Menu"
+    shout_subtitle $"Remove or Purge Menu"
 
     local ans
     show_package "$full"
@@ -785,10 +804,11 @@ apt_get_cmd() {
 # conversion may not be a good idea.
 #------------------------------------------------------------------------------
 get_glob_string() {
+    # The Enter key
     local var_nam=$1  enter=$(bqq $"Enter")
-    local line1=$"Please enter the term you want to search for."
-    local line2=$(printf $"Standard globbing wildcards %s and %s work." "'$(bqq '*')'" "'$(bqq '?')'")
-    local line3=$(printf $"Use an empty string or %s to return to main menu." "'$(bqq q)'<$enter>")
+    local line1=$"Please enter the term you want to search for"
+    local line2=$(printf $"Standard globbing wildcards %s and %s work" "'$(bqq '*')'" "'$(bqq '?')'")
+    local line3=$(printf $"Use an empty string or %s to return to main menu" "'$(bqq q)'<$enter>")
 
     title=$(printf "%s\n%s\n\n%s\n" "$line1" "$line2" "$line3")
 
@@ -886,6 +906,7 @@ add_to_result_menu() {
 
             ;;
 
+            # View <25> <exact|leading|any name|description> results
         *)  menu_printf "$prefix-view" $"View %s %s results" "$(nq $cnt)"  "$lab"  ;;
     esac
 }
@@ -1094,12 +1115,14 @@ Read_Sources
 
         if [ $LIST_FOUND_CNT -eq 0 ]; then
             Msg $"No list files were found"
+            # An <apt-get update> is required in order to continue
             Msg $"An %s is required in order to continue" "$apt_get"
             # FIXME BACK_TO_MAIN
             YES_no "$run_now" || return 1
 
         elif [ $LIST_ERR_CNT -gt 0 ]; then
             Msg $"It appears that at least one list file is missing"
+            # You should probably run <apt-get update> now
             Msg $"You should probably run %s now" "$apt_get"
             YES_no "$run_now" || return 0
 
@@ -1154,6 +1177,7 @@ list_error() {
 # regenerate our own database files
 #------------------------------------------------------------------------------
 do_update() {
+    # Doing <apt-get update>
     msg $"Doing %s" "$(pq apt-get update)"
 
     apt_get_cmd update
@@ -1195,6 +1219,7 @@ generate_database_files() {
         DB_FILE_LIST="$DB_FILE_LIST $to"
     done
 
+    # data base generation <took 12 seconds>
     msg_elapsed_t $"database generation"
 }
 
@@ -1257,6 +1282,7 @@ unmark_and_mark_installed() {
     sed -i -r -e "s/^M?I? ?(($ilist) )/I \1/" $files
     MARK_CNT=$(grep --count "^M" $db)
 
+    # database update <took 4 seconds>
     msg_elapsed_t $"database update"
 }
 
@@ -1271,7 +1297,7 @@ mark_package_and_deps() {
 
     # ignore <...> depends for now
     local all_deps=$(list_depends "$pack")
-    msg $"found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
+    msg $"Found %s dependencies" "$(nq $(echo $all_deps | wc -w))"
     local regex=$(echo $all_deps | tr ' ' '|')
     #echo "regex: $regex"
     local cnt=$(egrep --count "^($regex) " $db)
@@ -1567,7 +1593,7 @@ do_view_marked() {
         )
 
         local marked_size=$(marked_size)
-        msg $"Marked packages(s) will add %s Meg" "$(nq $marked_size)"
+        msg $"Marked package(s) will add %s Meg" "$(nq $marked_size)"
 
         local ans
         my_select ans $"Please select an action" "$menu"
@@ -1589,14 +1615,14 @@ do_view_marked() {
             (local i; for i in $(seq 1 $blanks); do echo; done)  > $SEARCH_FILE.nl
             cat $SEARCH_FILE | color_results                    >> $SEARCH_FILE.nl
 
-            msg $"%s packages were found." $cnt
+            msg $"%s packages were found" $cnt
             msg
             questn $"In the next step you will been shown a list of packages that you can scroll"
 
             questn $"Use %s, %s, %s, and %s to scroll the list" \
                 "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
 
-            questn $"Position the package you want near the bottom and then press %s to continue" "$(bqq q)"
+            questn $"Position the package you want near the bottom and then press %s to continue" "'$(bqq q)'"
             msg
             questn $"Press %s to see the list, %s to go the main menu, %s to do another search" \
                 "<$(bqq "Enter")>" "'$(bqq q)'" "'$(bqq s)'"
@@ -1627,7 +1653,7 @@ do_suggested() {
     local mark_cnt=0
     local ans
     while true; do
-
+        # Suggested <Command Line> packages
         shout_subtitle $"Suggested %s Packages" "$title"
 
         local   all_str="^[MIa-z0-9]"
@@ -1642,31 +1668,43 @@ do_suggested() {
         local all_match=  five_match=  four_match=  three_match=  two_match=  one_match=
 
         local TOTAL_MATCHES=0  FOUND_MATCH=
-        count_star_matches   all   $"total suggestion" $"total suggestions"
-        count_star_matches  five   $"star package"     $"star packages"  "*****"
-        count_star_matches  four   $"star package"     $"star packages"  "****+"
-        count_star_matches three   $"star package"     $"star packages"  "***+"
-        #count_star_matches   two   "package"     "star packages  "**+""
-        #count_star_matches   one   "package"     "star packages" "*+"
-        count_star_matches   zero  $"zero star package"  $"no star packages" ""
+        # 
+        count_star_matches   all   "total suggestion" "total suggestions"
+        count_star_matches  five   "star package"     "star packages"  "*****"
+        count_star_matches  four   "star package"     "star packages"  "****+"
+        count_star_matches three   "star package"     "star packages"  "***+"
+        #count_star_matches   two  "package"     "star packages  "**+""
+        #count_star_matches   one  "package"     "star packages" "*+"
+        count_star_matches   zero  "zero star package" "no star packages" ""
 
         if [ $TOTAL_MATCHES -eq 0 ]; then
             warn $"No suggestions were found!"
+            # error message if things are reall not working
             warn $"Check for the file %s" $SUGGESTED_FILE
             return
         fi
 
+        # View <16> <***> star packages
+        local view=$"View"
+
+        # View all <40> suggested packages
+        local view_all=$"View all"
+
        # Need to use a file because the commands below are in a subshell
+
         rm -f $FOUND_MATCH_FILE
         local star_menu=$(
             [ $mark_cnt -gt 0 ] && add_mark_entry
-            add_to_star_menu all    $"View all" $"suggestions"
-            add_to_star_menu five   $"View"     $"star packages"      "*****"
-            add_to_star_menu four   $"View"     $"star packages"      "****+"
-            add_to_star_menu three  $"View"     $"star packages"      "***+"
-            add_to_star_menu zero   $"View"     $"zero star packages" ""
-            menu_printf             skip        $"Skip to next step (don't view packages)"
-            #add_to_star_menu
+            # View all <25> suggested packages
+            add_to_star_menu all    "$view_all" $"suggested packages"
+            # View <16> <***> star packages
+            add_to_star_menu five   "$view"     $"star packages"      "*****"
+            add_to_star_menu four   "$view"     $"star packages"      "****+"
+            add_to_star_menu three  "$view"     $"star packages"      "***+"
+            # View <32> zero star packages
+            add_to_star_menu zero   "$view"     $"zero star packages" ""
+
+            menu_printf             skip        $"Skip to the next step (don't view packages)"
             menu_printf  'quit'    $"Go back to main menu"
         )
 
@@ -1708,12 +1746,14 @@ do_suggested() {
             local enter="$(bqq $"Enter")"
             local ucnt=$(egrep --count "^(M |[a-z0-9])" $SEARCH_FILE)
 
-            msg $"%s packages were found (%s uninstalled)." "$(nq $pack_cnt)" "$(nq $ucnt)"
+            msg $"%s packages were found (%s uninstalled)" "$(nq $pack_cnt)" "$(nq $ucnt)"
 
             msg
             questn $"In the next step you will been shown a list of packages that you can scroll"
-            questn $"Use <up-arrow>, <down-arrow>, <page-up>, and <page down> to scroll the list"
-            questn $"Position the package you want near the bottom and then press 'q' to continue"
+            # Use <up-arrow>, <down-arrow>, <page-up>, and <page-down> to scroll list
+            questn $"Use %s, %s, %s, and %s to scroll the list" \
+                "<$(bqq up-arrow)>" "<$(bqq down-arrow)>" "<$(bqq page-up)>" "<$(bqq page-down)>"
+            questn $"Position the package you want near the bottom and then press %s to continue" "'$(bqq q)'"
             msg
             questn $"Press %s to see the list, %s to go the main menu, %s to search again" \
                 "<$enter>" "$(bqq q)" "$(bqq r)"
