@@ -541,7 +541,7 @@ do_search() {
                 questn $"Position the package you want near the bottom and then press %s to continue" \
                     "'$(pqq q)'"
                 msg
-
+                echo
                 # Press <enter> to see the list, 'q' to go to the main menu
                 questn $"Press %s to see the list, %s to go to the main menu,"  "<$(pqq Enter)>" "'$(pqq q)'"
                 # [Press] 'r' to repeat the same search, 's' to do new search
