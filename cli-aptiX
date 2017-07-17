@@ -50,7 +50,8 @@ AUTO_UPDATE_INTERVAL="5"  # Days
     SUGGESTED_DB_DIR=$WORK_DIR/suggested
 
 MARK_CNT=0
-: ${EDITOR:=name}
+
+#: ${EDITOR:=nano}
 
 #------------------------------------------------------------------------------
 #
@@ -126,6 +127,8 @@ main() {
 
     read_all_cmdline_mingled "$@"
     set_colors $COLOR_SCHEME
+
+    #local MANPAGER=
 
     # For now (at least) add menus to the log file
     VERBOSE_SELECT=true
