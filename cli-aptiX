@@ -200,6 +200,7 @@ do_main_menu() {
 
     case $ans in
               search) do_search        ;;
+            search-*) do_search "${ans#search-}" ;;
               update) do_update        ;;
              upgrade) do_upgrade_menu  ;;
                 edit) do_source_menu   ;;
@@ -218,12 +219,21 @@ do_main_menu() {
 # my_select() routine.  This one is for the main menu.
 #------------------------------------------------------------------------------
 main_menu() {
-    local upgrade_lab
+    local upgrade_lab arch
+
+    case $(uname -m) in
+          i686) arch='amd64'     ;;
+        x86_64) arch='[456]86'   ;;
+    esac
+
     : ${UPGRADE_CNT:=$(count_upgrades)}
 
     menu_printf search    $"Search for packages to mark or install"
     add_suggest_entry     cli
     add_suggest_entry     gui
+    menu_printf "search-linux-image-.*antix.*$arch" $"Search for antiX kernels"
+    menu_printf "search-linux-image-.*$arch"        $"Search for all kernels"
+
     #menu_printf kernels   $"Search for kernels or antiX kernels"
     menu_printf update    $"Update package index"
     menu_printf edit      $"Edit the repo source files"
@@ -395,6 +405,7 @@ show_package() {
 # to smaller functions.
 #------------------------------------------------------------------------------
 do_search() {
+    local start_search=$1
 
     local ans
     # This loop is for doing new searches.  Maybe there is a better way in
@@ -406,7 +417,13 @@ do_search() {
         shout_subtitle $"Search for packages"
 
         local all_str
-        get_glob_string all_str
+        if [ -n "$start_search" ]; then
+            all_str=$start_search
+            echo "all_str: $all_str"
+            start_search=
+        else
+            get_glob_string all_str
+        fi
 
         case $all_str in
             [qQ]) return ;;
