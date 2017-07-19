@@ -221,6 +221,9 @@ do_main_menu() {
 main_menu() {
     local upgrade_lab arch
 
+    # As in "Search for <all> kernels
+    local all=$"all"
+
     case $(uname -m) in
           i686) arch='amd64'     ;;
         x86_64) arch='[456]86'   ;;
@@ -231,8 +234,10 @@ main_menu() {
     menu_printf search    $"Search for packages to mark or install"
     add_suggest_entry     cli
     add_suggest_entry     gui
-    menu_printf "search-linux-image-.*antix.*$arch" $"Search for antiX kernels"
-    menu_printf "search-linux-image-.*$arch"        $"Search for all kernels"
+
+    # Search for <all|antiX> kernels
+    menu_printf "search-linux-image-*antix*$arch"  $"Search for %s kernels"  'antiX'
+    menu_printf "search-linux-image-*$arch"        $"Search for %s kernels"  "$all"
 
     #menu_printf kernels   $"Search for kernels or antiX kernels"
     menu_printf update    $"Update package index"
@@ -418,8 +423,17 @@ do_search() {
 
         local all_str
         if [ -n "$start_search" ]; then
+
+            msg "Searching for %s" "$(pq "$start_search")"
+            echo
+
             all_str=$start_search
-            echo "all_str: $all_str"
+            # Convert '*' and '?' to their regular expression equivalents
+            # First protect "." in the original string
+            all_str=${all_str//./\\.}
+            all_str=${all_str//\?/.}
+            all_str=${all_str//\*/.*}
+
             start_search=
         else
             get_glob_string all_str
