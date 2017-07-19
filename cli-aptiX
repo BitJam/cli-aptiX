@@ -199,15 +199,15 @@ do_main_menu() {
     run_outer my_select 'ans' "$title" "$(main_menu)"
 
     case $ans in
-              search) do_search        ;;
+              search) do_search                  ;;
             search-*) do_search "${ans#search-}" ;;
-              update) do_update        ;;
-             upgrade) do_upgrade_menu  ;;
-                edit) do_source_menu   ;;
-       suggested-cli) do_suggested cli ;;
-       suggested-gui) do_suggested gui ;;
-         view-marked) do_view_marked   ;;
-                quit) exit             ;;
+              update) do_update                  ;;
+             upgrade) do_upgrade_menu            ;;
+                edit) do_source_menu             ;;
+       suggested-cli) do_suggested cli           ;;
+       suggested-gui) do_suggested gui           ;;
+         view-marked) do_view_marked             ;;
+                quit) exit                       ;;
 
         *)  warn "The '%s' feature isn't implemented yet" "$(pqw $ans)"
             press_enter ;;
