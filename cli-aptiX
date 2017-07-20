@@ -1067,6 +1067,14 @@ star_search() {
 #------------------------------------------------------------------------------
 list_depends() {
     apt-cache depends $* | sed -n -r "s/^\s*(Pre)?Depends:\s*//p" | grep -v "^<" | sort -u
+
+    # add the headers as a dependency when installing a kernel
+    local pack
+    for pack in $*; do
+        case $pack in
+            linux-image-*) echo linux-headers-${pack#linux-image-} ;;
+        esac
+    done
 }
 
 #------------------------------------------------------------------------------
@@ -2321,6 +2329,15 @@ start_testing_mode() {
     list_depends() {
         local regex=$(echo "$*" | tr ' ' '|')
         egrep "^($regex):" $TEST_DIR/all.depend | cut -d" " --complement -f1 | tr ' ' '\n' | sort -u
+
+        # add the headers as a dependency when installing a kernel
+        local pack
+        for pack in $*; do
+            case $pack in
+                linux-image-*) echo linux-headers-${pack#linux-image-} ;;
+            esac
+        done
+
     }
 
     package_exists() {
