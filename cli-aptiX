@@ -221,9 +221,6 @@ do_main_menu() {
 main_menu() {
     local upgrade_lab arch
 
-    # As in "Search for <all> kernels
-    local all=$"all"
-
     case $(uname -m) in
           i686) arch='amd64'     ;;
         x86_64) arch='[456]86'   ;;
@@ -235,9 +232,8 @@ main_menu() {
     add_suggest_entry     cli
     add_suggest_entry     gui
 
-    # Search for <all|antiX> kernels
-    menu_printf "search-linux-image-*antix*$arch"  $"Search for %s kernels"  'antiX'
-    menu_printf "search-linux-image-*$arch"        $"Search for %s kernels"  "$all"
+    menu_printf "search-linux-image-*antix*$arch"  $"Search for antiX kernels"
+    menu_printf "search-linux-image-*$arch"        $"Search for all kernels"
 
     #menu_printf kernels   $"Search for kernels or antiX kernels"
     menu_printf update    $"Update package index"
