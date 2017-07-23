@@ -10,7 +10,7 @@
 # License: GPLv3 or later
 #==============================================================================
 
-VERSION="01.00.01"
+VERSION="1.00.01"
 VERSION_DATE="Sun Jul 23 00:37:15 MDT 2017"
 
 MAIN_TITLE=$"antiX CLI Package Installer"
