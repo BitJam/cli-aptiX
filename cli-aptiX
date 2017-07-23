@@ -10,7 +10,10 @@
 # License: GPLv3 or later
 #==============================================================================
 
-MAIN_TITLE="antiX CLI Package Installer"
+VERSION="01.00.01"
+VERSION_DATE="Sun Jul 23 00:37:15 MDT 2017"
+
+MAIN_TITLE=$"antiX CLI Package Installer"
 
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
@@ -70,6 +73,7 @@ Options:
     -h --help          Show this usage
     -N --numeric-ui    Use the legacy numerical user interface
        --pause         Pause before exiting
+    -v --version       Show version information
 Usage
     exit $ret
 }
@@ -82,6 +86,7 @@ eval_early_argument() {
     case $1 in
                -pause) PAUSE="$PAUSE${PAUSE:+,}exit" ;;
               -help|h) usage                         ;;
+           -version|v) show_version                  ;;
     esac
 }
 
@@ -116,7 +121,7 @@ takes_param() {
 # and so on.   Could that be a submenu???
 #------------------------------------------------------------------------------
 main() {
-    local SHORT_STACK="CGhN"
+    local SHORT_STACK="CGhNv"
 
     # Keyboard keys: up-arrow, down-arrow, page-up, page-down
     local UP_ARROW=$"up-arrow"  DOWN_ARROW=$"down-arrow" PAGE_UP=$"page-up" PAGE_DOWN=$"page-down"
