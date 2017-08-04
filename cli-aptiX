@@ -201,7 +201,15 @@ do_main_menu() {
     local title=$"Main Menu"
     local ans
 
-    run_outer my_select 'ans' "$title" "$(main_menu)"
+    local arch  raw_arch=$(uname -m)
+    testing && raw_arch=i686
+    case $raw_arch in
+         x86_64) arch='amd64'    ;;
+           i686) arch='[456]86'  ;;
+              *) internal_error 'finding machine arch' "$raw_arch"
+    esac
+
+    run_outer my_select 'ans' "$title" "$(main_menu $arch)"
 
     local val=${ans#*-}
     case $ans in
@@ -224,12 +232,7 @@ do_main_menu() {
 # my_select() routine.  This one is for the main menu.
 #------------------------------------------------------------------------------
 main_menu() {
-    local upgrade_lab arch
-
-    case $(uname -m) in
-          i686) arch='amd64'     ;;
-        x86_64) arch='[456]86'   ;;
-    esac
+    local upgrade_lab  arch=$1
 
     : ${UPGRADE_CNT:=$(count_upgrades)}
 
