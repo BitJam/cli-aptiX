@@ -10,8 +10,8 @@
 # License: GPLv3 or later
 #==============================================================================
 
-VERSION="1.00.01"
-VERSION_DATE="Sun Jul 23 00:37:15 MDT 2017"
+VERSION="1.00.02"
+VERSION_DATE="Thu Aug  3 18:27:01 MDT 2017"
 
 MAIN_TITLE=$"antiX Command Line Package Installer"
 
