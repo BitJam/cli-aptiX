@@ -574,11 +574,17 @@ do_search() {
                 questn $"Position the package you want near the bottom and then press %s to continue" \
                     "'$(pqq q)'"
                 msg
-                echo
-                # Press <enter> to see the list, 'q' to go to the main menu
-                questn $"Press %s to see the list, %s to go to the main menu,"  "<$(pqq Enter)>" "'$(pqq q)'"
-                # [Press] 'r' to repeat the same search, 's' to do new search
-                questn $"%s to repeat same search, %s to do new search"  "'$(pqq r)'"     "'$(pqq s)'"
+                #echo
+                # Press <enter> to see the list
+
+                local enter="$(pqq $"Enter")"
+
+                questn $"Press %s to see the list"       "<$enter>"
+                questn $"Use %s to go to the main menu"  "'$(pqq q)'"
+                # Use 'r' to repeat the same search
+                questn $"Use %s to repeat same search"   "'$(pqq r)'"
+                # Use 's' to do a new search
+                questn $"Use %s to do new search"        "'$(pqq s)'"
                 quest "> "
 
                 read -n1 ans
@@ -598,7 +604,7 @@ do_search() {
 
             # This loop is to repeat the 'number' input if needed.
             # The action variable helps us to figure out what to do in the surrounding loop
-            local action enter=$(pqq "Enter")
+            local action  enter=$(pqq "Enter")
 
             # LOOP: enter a number
             while true; do
@@ -608,8 +614,9 @@ do_search() {
                 # Use '-' to indicate a range of numbers
                 questn $"Use %s to indicate a range of numbers" "$(pqq -)"
                 # [Use] 'q<enter>' to go the main menu, 'r<enter>' see the results again, 's<enter>' to do a new search
-                questn $"%s to go to main menu, %s to see the results again, %s to do a new search" \
-                    "$(pqq q)<$enter>" "$(pqq r)<$enter>" "$(pqq s)<$enter>"
+                questn $"Use %s to go to main menu"       "$(pqq q)<$enter>"
+                questn $"Use %s to see the results again" "$(pqq r)<$enter>"
+                questn $"Use %s to do a new search"       "$(pqq s)<$enter>"
                 quest "> "
 
                 local input=
@@ -1478,7 +1485,7 @@ show_deb_info() {
             Description-en:*) ;;
             *) continue;
         esac
-        echo "$cyab${line#Description-en: }$nc_co"
+        echo "$cyan${line#Description-en: }$nc_co"
         break
     done
 
@@ -1630,6 +1637,8 @@ do_view_marked() {
 
     shout_subtitle $"View or Install Marked Packages"
 
+    local enter="$(pqq $"Enter")"
+
     while true; do
 
         grep "^M" $db > $SEARCH_FILE
@@ -1681,8 +1690,10 @@ do_view_marked() {
 
             questn $"Position the package you want near the bottom and then press %s to continue" "'$(pqq q)'"
             msg
-            questn $"Press %s to see the list, %s to go the main menu, %s to do another search" \
-                "<$(pqq "Enter")>" "'$(pqq q)'" "'$(pqq s)'"
+            questn $"Press %s to see the list"     "<$enter>"
+            questn $"Use %s to go the main menu"   "$(pqq q)<$enter>"
+            questn $"Use %s to do another search"  "$(pqq s)<$enter>"
+
 
             read ans
             case $ans in
@@ -1762,7 +1773,7 @@ do_suggested() {
             add_to_star_menu zero   "$view"     $"zero star packages" ""
 
             menu_printf             skip        $"Skip to the next step (don't view packages)"
-            menu_printf  'quit'    $"Go back to main menu"
+            menu_printf             quit        $"Go back to main menu"
         )
 
         local ans
@@ -1840,7 +1851,8 @@ do_suggested() {
             questn $"Press %s to skip picking a package" "<$enter>"
             questn $"Or enter the number of each package you want to mark or install"
             questn $"Use %s to indicate a range of numbers" "$(pqq -)"
-            questn $"Use %s to go to main menu, %s to see the results again" "$(pqq q)<$enter>" "$(pqq r)<$enter>"
+            questn $"Use %s to go to main menu"        "$(pqq q)<$enter>"
+            questn $"Use %s to see the results again"  "$(pqq r)<$enter>"
             quest "> "
 
             local input=
