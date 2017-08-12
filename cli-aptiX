@@ -13,8 +13,6 @@
 VERSION="1.00.02"
 VERSION_DATE="Thu Aug  3 18:27:01 MDT 2017"
 
-MAIN_TITLE=$"antiX Command Line Package Installer"
-
         ME=${0##*/}
     MY_DIR=$(dirname "$(readlink -f $0)")
 MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
@@ -192,7 +190,7 @@ main() {
 do_main_menu() {
 
     msg
-    shout_title "$MAIN_TITLE"
+    shout_title $"antiX Command Line Package Installer"
 
     suggest_warning cli
     suggest_warning gui
@@ -271,7 +269,7 @@ suggest_warning() {
 #------------------------------------------------------------------------------
 upgrade_warning() {
     [ $UPGRADE_CNT -gt 0 ] && return
-    msg "(no pending upgrades)"
+    msg "(%s)" $"no pending upgrades"
 }
 
 #------------------------------------------------------------------------------
