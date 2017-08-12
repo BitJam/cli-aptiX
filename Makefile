@@ -6,20 +6,23 @@ SHELL       := /bin/bash
 ME          := cli-aptiX
 
 BIN_DIR     := $(ROOT)/usr/local/bin
-LOCALE_DIR  := $(ROOT)/usr/share/
+LOCALE_DIR  := $(ROOT)/usr/share/locale
 MAN_DIR     := $(ROOT)/usr/share/man/man1
 SHARE_DIR   := $(ROOT)/usr/local/share/$(ME)
 DESKTOP_DIR := $(ROOT)/usr/share/applications/antix
 
 ALL_DIRS   := $(BIN_DIR) $(LOCALE_DIR) $(MAN_DIR) $(SHARE_DIR) $(DESKTOP_DIR)
 
-.PHONY: $(SCRIPTS) help all script man-page shared-files desktop-file
+.PHONY: $(SCRIPTS) help all script man-page shared-files desktop-file locales
 
 help:
 	@#echo ""
 	@#echo ""
 
-all: script man-page shared-files desktop-file
+all: script man-page shared-files desktop-file locales
+
+locales: | $(LOCALE_DIR)
+	cp -r locale/* $(LOCALE_DIR)
 
 script: $(ME) | $(BIN_DIR)
 	cp $(ME) $(BIN_DIR)/
