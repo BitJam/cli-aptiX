@@ -178,6 +178,7 @@ main() {
     #shout_title "$MAIN_MENU"
     #do_search
 
+    set_window_title
     while true; do
         do_main_menu
     done
@@ -2371,6 +2372,7 @@ my_exit() {
     testing || umount_work_dir
     testing || unflock
     pause exit $"Exit"
+    clear_window_title
     exit $ret
 }
 
