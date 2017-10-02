@@ -2194,7 +2194,7 @@ view_upgrades() {
 # Do the upgrade and then regenerate our database
 #------------------------------------------------------------------------------
 do_upgrade() {
-    apt_get_cmd upgrade
+    apt_get_cmd dist-upgrade
 
     [ "$JUST_UPDATE" ] && return
     generate_database_files
