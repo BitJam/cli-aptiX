@@ -154,7 +154,7 @@ main() {
 
     testing || do_flock
     #shout $"Starting %s" "$ME"
-    start_log "$*"
+    start_log "$THE_LOG_FILE" "$*"
 
     find_man_page
 
@@ -2205,29 +2205,6 @@ do_upgrade() {
 # the user pressing 'q' when we are waiting for input.
 #------------------------------------------------------------------------------
 run_outer() { local BACK_TO_MAIN= ; "$@" ; }
-
-#------------------------------------------------------------------------------
-# Start logging by appending a simple header
-#------------------------------------------------------------------------------
-start_log() {
-    local args=$1 cmds=${2# }
-
-    LOG_FILE=$THE_LOG_FILE
-
-    cat <<Start_Log >> $LOG_FILE
----------------------------------------------------------------------
-$0
-        started: $(date)
-        version: $VERSION ($VERSION_DATE)
-    comand line: $args
-      found lib: $FOUND_LIB
-     TEXTDOMAIN: $TEXTDOMAIN
-  TEXTDOMAINDIR: $TEXTDOMAINDIR
-     SOURCE_DIR: $SOURCE_DIR
-       LIST_DIR: $LIST_DIR
-
-Start_Log
-}
 
 #------------------------------------------------------------------------------
 # Return the height / width of the screen in chars.
