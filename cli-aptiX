@@ -1151,7 +1151,7 @@ check_list_files() {
             fi
 
         done << Read_Sources
-$(grep -h "^\s*\(deb\|deb-src\)\>" $src_dir/*.list)
+$(grep -h "^\s*\(deb\|deb-src\)\>" $src_dir/*.list | sed "s/\[[^\s]*\]//")
 Read_Sources
 
         local now_t=$(date +%s)
