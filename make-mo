@@ -6,7 +6,7 @@ to_dir="locale"
 main() {
     for name in $NAMES; do
         from_dir="../translations/antix-development.$name"
-        echo -n "$name:"
+        printf "%25s:" "$name"
 
         local from_file
         for from_file in $from_dir/*.po; do
