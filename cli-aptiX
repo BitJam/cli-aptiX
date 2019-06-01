@@ -38,7 +38,6 @@ export TEXTDOMAIN="cli-aptiX"
 
    THE_LOG_FILE=/var/log/$ME.log
 
-
 AUTO_UPDATE_INTERVAL="5"  # Days
 
     WORK_DIR=/tmp/$ME
@@ -2195,6 +2194,8 @@ view_upgrades() {
 #------------------------------------------------------------------------------
 do_upgrade() {
     apt_get_cmd dist-upgrade
+
+    UPGRADE_CNT=$(count_upgrades)
 
     [ "$JUST_UPDATE" ] && return
     generate_database_files
