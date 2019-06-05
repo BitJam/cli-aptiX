@@ -2138,7 +2138,7 @@ list_installed() { dpkg-query --show | sort | cut -f1; }
 #------------------------------------------------------------------------------
 # Count the number of packages that can/will be upgraded
 #------------------------------------------------------------------------------
-count_upgrades() { apt list --upgradable 2>/dev/null | LANG=C grep -v "^Listing" | wc -l;  }
+count_upgrades() {LANG=C apt list --upgradable 2>/dev/null | grep -v "^Listing" | wc -l; }
 
 #------------------------------------------------------------------------------
 # Check to for system upgrades
