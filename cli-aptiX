@@ -226,6 +226,14 @@ do_main_menu() {
             press_enter ;;
     esac
 }
+#------------------------------------------------------------------------------
+# Get last update time
+#------------------------------------------------------------------------------
+last_update() {
+    local stamp_file="/var/lib/apt/periodic/update-success-stamp"
+    [ -e $stamp_file ] || return
+    printf "(%s %s)" $"last update" "$(date -d @$(stat -c %Z $stamp_file))"
+}
 
 #------------------------------------------------------------------------------
 # Note: xxxx_menu() is to to generate the text of the menu to be sent to the
@@ -244,7 +252,7 @@ main_menu() {
     menu_printf "search-linux-image-*$arch"        $"Search for all kernels"
 
     #menu_printf kernels   $"Search for kernels or antiX kernels"
-    menu_printf update    $"Update package index"
+    menu_printf update    $"Update package index"" $(last_update)"
     menu_printf edit      $"Edit the repo source files"
     add_upgrade_entry
     add_mark_entry
@@ -324,6 +332,8 @@ upgrade_menu() {
     menu_printf_plural upgrade $cnt $"Upgrade %s package now" $"Upgrade %s packages now"
     menu_printf        view    $"View a list of packages to be upgraded"
     menu_printf        ignore  $"Ignore these upgrades for now"
+    menu_printf        update  $"Update package index"" $(last_update)"
+
 }
 
 #------------------------------------------------------------------------------
