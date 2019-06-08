@@ -1,5 +1,5 @@
 
-ROOT        := .
+ROOT        := ./debian
 
 SHELL       := /bin/bash
 
@@ -10,16 +10,19 @@ LOCALE_DIR  := $(ROOT)/usr/share/locale
 MAN_DIR     := $(ROOT)/usr/share/man/man1
 SHARE_DIR   := $(ROOT)/usr/local/share/$(ME)
 DESKTOP_DIR := $(ROOT)/usr/share/applications/antix
+RULES_DIR   := $(ROOT)/etc/apt/apt.conf.d/
+ALL_DIRS    := $(BIN_DIR) $(LOCALE_DIR) $(MAN_DIR) $(SHARE_DIR) $(DESKTOP_DIR) $(RULES_DIR)
 
-ALL_DIRS   := $(BIN_DIR) $(LOCALE_DIR) $(MAN_DIR) $(SHARE_DIR) $(DESKTOP_DIR)
-
-.PHONY: $(SCRIPTS) help all script man-page shared-files desktop-file locales
+.PHONY: $(SCRIPTS) help all script man-page shared-files desktop-file locales apt-rule install clean
 
 help:
-	@#echo ""
-	@#echo ""
+	@echo "help            		show this usage"
+	@echo "install         		install to ./debian"
+	@echo "install ROOT=   	 	install to root directory"
+	@echo "install ROOT=../xtra install to ../xtra directory"
+	@echo "clean           		remove contents of debian/ directory"
 
-all: script man-page shared-files desktop-file locales
+install: script man-page shared-files desktop-file locales
 
 locales: | $(LOCALE_DIR)
 	cp -r locale/* $(LOCALE_DIR)
@@ -36,6 +39,11 @@ shared-files: | $(SHARE_DIR)
 desktop-file: | $(DESKTOP_DIR)
 	cp desktop/*.desktop $(DESKTOP_DIR)
 
+apt-rule: | $(RULES_DIR)
+		cp apt.conf.d/* $(RULES_DIR)
+
+clean:
+	rm -rf ./debian/*
 $(ALL_DIRS):
 	test -d $(ROOT)/
 	mkdir -p $@
