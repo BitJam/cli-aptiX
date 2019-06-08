@@ -5,7 +5,9 @@
 #
 # A cli wrapper around apt-get and apt-cache to provide some of the
 # functionality of Synaptic on the command line.
-
+#
+# Thanks to fehlix for bug fixes and improvements!
+#
 # (C) 2017 - 2019 Paul Banham <antiX@operamail.com>
 # License: GPLv3 or later
 #==============================================================================
