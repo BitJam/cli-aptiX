@@ -23,6 +23,9 @@ MY_LIB_DIR=$(readlink -f "$MY_DIR/../cli-shell-utils")
 GRAPHICAL_MENUS=true
 export TEXTDOMAIN="cli-aptiX"
 
+# "aptiX" is the short name of this program
+export LESS="-Ps"$"Press 'q' to return to aptiX"
+
   LIB_PATH="$MY_LIB_DIR:$LIB_DIR"
       PATH="$MY_LIB_DIR/bin:$LIB_DIR/bin:$PATH"
  SHELL_LIB="cli-shell-utils.bash"
@@ -610,7 +613,7 @@ do_search() {
                 local offset=$((blanks + 1))
                 [ $((offset + height)) -gt $((blanks + cnt + 2)) ] && offset=$((cnt + blanks - height + 2))
 
-                less -RXSm +$offset --shift=.20 $SEARCH_FILE.nl
+                less -RXS +$offset --shift=.20 $SEARCH_FILE.nl
 
             fi
 
@@ -1483,7 +1486,7 @@ package_info() {
 
     yes_NO $"Do you want to see more detailed information?" || return
 
-    apt-cache show $pack | sed -r "s/^([A-Za-z0-9-]+):/$m_co\1:$nc_co/" | less -MSFR
+    apt-cache show $pack | sed -r "s/^([A-Za-z0-9-]+):/$m_co\1:$nc_co/" | less -SFR
 
     #press_enter
 }
@@ -1717,7 +1720,7 @@ do_view_marked() {
             local offset=$((blanks + 1))
             [ $((offset + height)) -gt $((blanks + cnt + 2)) ] && offset=$((cnt + blanks - height + 2))
 
-            less -RXSm +$offset --shift=.20 $SEARCH_FILE.nl
+            less -RXS +$offset --shift=.20 $SEARCH_FILE.nl
         fi
     done
 }
@@ -1852,7 +1855,7 @@ do_suggested() {
             local offset=$((blanks + 1))
             [ $((offset + height)) -gt $((blanks + line_cnt + 2)) ] && offset=$((line_cnt + blanks - height + 2))
 
-            less -RXSm +$offset --shift=.20 $SEARCH_FILE.nl
+            less -RXS +$offset --shift=.20 $SEARCH_FILE.nl
         fi
 
         local action=  enter=$(pqq $"Enter")
@@ -2186,6 +2189,7 @@ do_upgrade_menu() {
         case $ans in
              ignore) return              ;;
                quit) return              ;;
+             update) do_update  ; return ;;
             upgrade) do_upgrade ; return ;;
                view) view_upgrades       ;;
                   *) internal_error 'upgrade_menu' "$ans" ;;
