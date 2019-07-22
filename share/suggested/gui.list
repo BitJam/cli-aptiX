@@ -46,7 +46,7 @@ filezilla             Full-featured graphical FTP/FTPS/SFTP client
 netsurf               small web browser with CSS support - transitional package
 palemoon              Firefox-based, efficient and easy to use web browser
 qbittorrent           bittorrent client based on libtorrent-rasterbar with a Qt5 GUI
-qupzilla              lightweight web browser based on libqtwebkit
+falkon                lightweight web browser based on libqtwebkit
 seamonkey             The Seamonkey Internet Suite
 thunderbird           mail/news client with RSS, chat and integrated spam filter support
 
