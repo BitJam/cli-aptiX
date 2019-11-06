@@ -130,7 +130,7 @@ main() {
 
     read_early_params "$@"
 
-    testing || need_root
+    testing || run_me_as_root "$@"
 
     read_all_cmdline_mingled "$@"
     set_colors $COLOR_SCHEME
