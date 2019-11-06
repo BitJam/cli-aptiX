@@ -1486,7 +1486,7 @@ package_info() {
 
     yes_NO $"Do you want to see more detailed information?" || return
 
-    apt-cache show $pack | sed -r "s/^([A-Za-z0-9-]+):/$m_co\1:$nc_co/" | less -SFR
+    apt-cache show $pack | sed -r "s/^([A-Za-z0-9-]+):/$m_co\1:$nc_co/" | less -SR
 
     #press_enter
 }
