@@ -167,17 +167,11 @@ main() {
 
     #msg "Checking to see if an %s is needed ..." "$(pq apt-get update)"
 
-    # Don't run check_for_updates or generate_database_files automatically
-    local JUST_UPDATE=true
-
     # FIXME!!
     run_outer check_list_files || exit
 
     check_for_upgrades
     generate_database_files
-
-    # Ok, you can run check_for_updates or generate_database_file automatically now
-    JUST_UPDATE=
 
     #shout_title "$MAIN_MENU"
     #do_search
@@ -1262,8 +1256,6 @@ do_update() {
     fi
     UPGRADE_CNT=
 
-    [ "$JUST_UPDATE" ] && return
-
     check_for_upgrades
     generate_database_files
 }
@@ -2212,8 +2204,6 @@ do_upgrade() {
     apt_get_cmd dist-upgrade
 
     UPGRADE_CNT=$(count_upgrades)
-
-    [ "$JUST_UPDATE" ] && return
     generate_database_files
 }
 
